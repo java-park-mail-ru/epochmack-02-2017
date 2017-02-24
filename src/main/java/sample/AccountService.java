@@ -48,16 +48,17 @@ public class AccountService {
     }
 
     public void changeUser (@NotNull UserProfile currentUser, @NotNull String type, @NotNull String value){
-        if (type == "Login"){
+        if (type.equals("login")){
             userNameToUserProfile.remove(currentUser.getLogin(),currentUser);
             currentUser.setLogin(value);
-            userNameToUserProfile.put(value, currentUser);
+            userNameToUserProfile.put(currentUser.getLogin(), currentUser);
         }
-        else if (type == "Mail"){
+        else if (type.equals("mail")){
             currentUser.setMail(value);
         }
-        else if (type == "Password")
+        else if (type.equals("password")) {
             currentUser.setPassword(value);
+        }
     }
 
     public void changeScore (@NotNull UserProfile currentUser, @NotNull Integer score){
