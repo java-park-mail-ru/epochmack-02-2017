@@ -3,6 +3,7 @@ package sample;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,7 +21,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Created by Solovyev on 09/02/2017.
+ * Created by Fedorova on 20/02/2017.
  */
 @RestController
 public class UserController {
@@ -87,34 +88,38 @@ public class UserController {
     @RequestMapping(path = "api/settings", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> changeUser(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
         String login = (String) httpSession.getAttribute("Login");
-        if( login == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        if(httpSession.getId() != userIdToUserCookie.get(currentUser.getId()) )
-            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User cookie wrong");
-        if(body.getType() == null | body.getValue() == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Settings not found");
-        accountService.changeUser(currentUser, body.getType(), body.getValue());
+        String type = body.getType();
+        String value = body.getValue();
+        if( type.equals(""))
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Type not found");
+        if( value.equals(""))
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Value not found");
+        accountService.changeUser(currentUser, type, value);
+        httpSession.setAttribute("Login", currentUser.getLogin());
         return ResponseEntity.ok("OK");
     }
 
-    @RequestMapping(path = "api/score", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    @RequestMapping(path = "api/changescore", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> changeScore(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
         String login = (String) httpSession.getAttribute("Login");
-        if( login == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        if(httpSession.getId() != userIdToUserCookie.get(currentUser.getId()) )
-            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User cookie wrong");
-        if(body.getScore() == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Settings not found");
         accountService.changeScore(currentUser, body.getScore());
         return ResponseEntity.ok("OK");
 
+    }
+
+    @RequestMapping(path = "api/getscore", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    public ResponseEntity<?> getScore (HttpSession httpSession){
+        String login = (String) httpSession.getAttribute("Login");
+        UserProfile currentUser = accountService.getUserByLogin(login);
+        if(currentUser == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        return  ResponseEntity.status(HttpStatus.OK).body(currentUser.getScore());
     }
     /**
      * Конструктор тоже будет вызван с помощью reflection'а. Другими словами, объект создается через ApplicationContext.
@@ -130,7 +135,7 @@ public class UserController {
 
         @JsonCreator
         @SuppressWarnings({"unused", "null"})
-        GetBody(@JsonProperty("login") String login, @JsonProperty("password") String password, @JsonProperty("password") String mail ) {
+        GetBody(@JsonProperty("login") String login, @JsonProperty("password") String password, @JsonProperty("mail") String mail ) {
             this.login = login;
             this.mail = mail;
             this.password = password;
@@ -155,20 +160,23 @@ public class UserController {
 
         @JsonCreator
         @SuppressWarnings({"unused", "null"})
-        GetBodySettings(@JsonProperty("settingstype") String type, @JsonProperty("settingsvalue") String value, @JsonProperty("score") Integer score) {
+        GetBodySettings(@JsonProperty("type") String type, @JsonProperty("value") String value, @JsonProperty("score") Integer score) {
             this.type = type;
             this.value = value;
             this.score = score;
         }
 
+        @NotNull
         public String getType() {
             return type;
         }
 
+        @NotNull
         public String getValue() {
             return value;
         }
 
+        @NotNull
         public Integer getScore() {
             return score;
         }

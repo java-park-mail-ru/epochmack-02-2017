@@ -19,6 +19,7 @@ public class UserProfile {
         this.login = login;
         this.password = password;
         this.id = ID_GENETATOR.getAndIncrement();
+        this.hightScore = 0;
     }
 
     public void setScore(Integer score){
