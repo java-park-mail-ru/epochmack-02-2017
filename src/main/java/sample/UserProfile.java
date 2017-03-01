@@ -57,5 +57,4 @@ public class UserProfile {
     public long getId(){
         return this.id;
     }
-    //some missing fields here
 }

@@ -30,11 +30,7 @@ public class UserController {
     @Autowired
     private final AccountService accountService;
     private Map<Long, String> userIdToUserCookie = new HashMap<>();
-    /**
-     * Данный метод вызывается с помощью reflection'a, поэтому Spring позволяет инжектить в него аргументы.
-     * Подробнее можно почитать в сорцах к аннотации {@link RequestMapping}. Там описано как заинжектить различные атрибуты http-запроса.
-     * Возвращаемое значение можно так же варьировать. Н.п. Если отдать InputStream, можно стримить музыку или видео
-     */
+
 
     @RequestMapping(path = "api/registration", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> Registration(@RequestBody GetBody body, HttpSession httpSession)  {
@@ -43,14 +39,13 @@ public class UserController {
         final String mail = body.getMail();
 
         if(accountService.getUserByLogin(login)  != null)
-            return  ResponseEntity.status(HttpStatus.CONFLICT).body("Login already exist");
+            return  ResponseEntity.status(HttpStatus.CONFLICT).body("{\"error\": \"Login already exist\" }");
         if(accountService.getUserByMail(mail) != null)
-            return  ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exist");
-
+            return  ResponseEntity.status(HttpStatus.CONFLICT).body("{\"Email\": \"already exist\" }");
         UserProfile currentUser = accountService.register(mail, login, passwordEncoder().encode(password));
         userIdToUserCookie.put(currentUser.getId(), httpSession.getId());
         httpSession.setAttribute("Login", login);
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok("{\"OK\": \"OK\"}");
     }
 
     @RequestMapping(path = "api/login", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
@@ -60,29 +55,29 @@ public class UserController {
         UserProfile currentUser = accountService.getUserByLogin(login);
 
         if(currentUser  == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Wrong login or password");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Wrong login or password\"}");
         if(passwordEncoder().matches(password, currentUser.getPassword())
                 & userIdToUserCookie.get(currentUser.getId()) == httpSession.getId()){
             httpSession.setAttribute("Login", login);
-            return ResponseEntity.ok("OK");
+            return ResponseEntity.ok("{\"OK\": \"OK\"}");
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Wrong login or password");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\":\"Wrong login or password\"}");
     }
 
     @RequestMapping(path = "api/user", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-    public String getUser (HttpSession httpSession){
+    public ResponseEntity<?> getUser (HttpSession httpSession){
         String login = (String) httpSession.getAttribute("Login");
         if( login == null)
-            return null;
-        return login;
+            return ResponseEntity.status(HttpStatus.OK).body("{\"Login\": \"User not found\"}");
+        return ResponseEntity.status(HttpStatus.OK).body("{\"Login\": \"" + login + "\"}");
     }
 
     @RequestMapping(path = "api/logout", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> logout( HttpSession httpSession)  {
         if(httpSession.getAttribute("Login") == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User is not authorized");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User is not authorized\"}");
         httpSession.removeAttribute("Login");
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok("{\"OK\": \"OK\"}");
     }
 
     @RequestMapping(path = "api/settings", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
@@ -90,41 +85,45 @@ public class UserController {
         String login = (String) httpSession.getAttribute("Login");
         UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found\"}");
         String type = body.getType();
         String value = body.getValue();
-        if( type.equals(""))
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Type not found");
-        if( value.equals(""))
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Value not found");
+        if( type == null & type.equals(""))
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty type\"}");
+        if( value == null & value.equals(""))
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty value\"}");
         accountService.changeUser(currentUser, type, value);
         httpSession.setAttribute("Login", currentUser.getLogin());
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok("{\"OK\": \"OK\"}");
     }
 
     @RequestMapping(path = "api/changescore", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> changeScore(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
         String login = (String) httpSession.getAttribute("Login");
+        if(login == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty user\"}");
         UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found\"}");
+        Integer score = body.getScore();
+        if(score == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty score\"}");
         accountService.changeScore(currentUser, body.getScore());
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok("{\"OK\": \"OK\"}");
 
     }
 
     @RequestMapping(path = "api/getscore", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> getScore (HttpSession httpSession){
         String login = (String) httpSession.getAttribute("Login");
+        if(login == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty user\"}");
         UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        return  ResponseEntity.status(HttpStatus.OK).body(currentUser.getScore());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found\"}");
+        return  ResponseEntity.status(HttpStatus.OK).body("{\"score\":\"" + currentUser.getScore() + "\"}");
     }
-    /**
-     * Конструктор тоже будет вызван с помощью reflection'а. Другими словами, объект создается через ApplicationContext.
-     * Поэтому в нем можно использовать DI. Подробнее про это расскажу на лекции.
-     */
+
     @Autowired
     public UserController(@NotNull AccountService accountService) {
         this.accountService = accountService;
@@ -166,17 +165,14 @@ public class UserController {
             this.score = score;
         }
 
-        @NotNull
         public String getType() {
             return type;
         }
 
-        @NotNull
         public String getValue() {
             return value;
         }
 
-        @NotNull
         public Integer getScore() {
             return score;
         }

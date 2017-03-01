@@ -66,12 +66,4 @@ public class AccountService {
             currentUser.setScore(score);
     }
 
-   /* public Map<String, Integer> bestPlayers(){
-        Map<String, Integer> userLoginToUserScore = new HashMap<>();
-        for(UserProfile user: userNameToUserProfile.values()){
-            userLoginToUserScore.put(user.getLogin(), user.getScore());
-        }
-        if(!userLoginToUserScore.isEmpty())
-            userLoginToUserScore.
-    }*/
 }
