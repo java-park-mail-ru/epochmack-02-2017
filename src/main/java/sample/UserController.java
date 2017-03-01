@@ -81,7 +81,7 @@ public class UserController {
     }
 
     @RequestMapping(path = "api/settings", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-    public ResponseEntity<?> changeUser(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
+    public ResponseEntity<?> editUser(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
         String login = (String) httpSession.getAttribute("Login");
         UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
@@ -97,8 +97,8 @@ public class UserController {
         return ResponseEntity.ok("{\"OK\": \"OK\"}");
     }
 
-    @RequestMapping(path = "api/changescore", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-    public ResponseEntity<?> changeScore(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
+    @RequestMapping(path = "api/setscore", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    public ResponseEntity<?> setScore(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
         String login = (String) httpSession.getAttribute("Login");
         if(login == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty user\"}");
