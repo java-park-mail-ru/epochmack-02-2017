@@ -6,19 +6,19 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by Fedorova on 20/02/2017.
  */
+@SuppressWarnings("unnused")
 public class UserProfile {
 
-    private String mail, login, password;
+    private String mail;
+    private String login;
+    private String password;
     private Integer hightScore;
-    private long id;
 
-    private static final AtomicLong ID_GENETATOR = new AtomicLong(0);
 
     public UserProfile(@NotNull String mail, @NotNull String login, @NotNull String password){
         this.mail = mail;
         this.login = login;
         this.password = password;
-        this.id = ID_GENETATOR.getAndIncrement();
         this.hightScore = 0;
     }
 
@@ -54,7 +54,4 @@ public class UserProfile {
         return hightScore;
     }
 
-    public long getId(){
-        return this.id;
-    }
 }
