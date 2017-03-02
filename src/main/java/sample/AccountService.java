@@ -1,13 +1,10 @@
 package sample;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.eclipse.jetty.server.Authentication;
+
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
-import javax.jws.soap.SOAPBinding;
-import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,42 +19,43 @@ public class AccountService {
     @NotNull
     public UserProfile register(@NotNull  String mail, @NotNull  String login, @NotNull  String password) {
 
-        UserProfile currentUser = new UserProfile(mail, login, password);
+        final UserProfile currentUser = new UserProfile(mail, login, password);
         userNameToUserProfile.put(login, currentUser);
 
         return currentUser;
     }
 
-    public boolean login(@NotNull String login, @NotNull  String password) {
-        if( userNameToUserProfile.containsKey(login) & userNameToUserProfile.get(login).getPassword() == password) {
-            return true;
-        }
-        else return false;
+    public boolean verifylogin(@NotNull String login) {
+        return ( userNameToUserProfile.containsKey(login));
     }
 
     public UserProfile getUserByLogin(@NotNull String login){
         return userNameToUserProfile.get(login);
     }
 
+    @Nullable
     public UserProfile getUserByMail(@NotNull String mail){
         for(UserProfile user: userNameToUserProfile.values()){
-           if (user.getMail() == mail)
+           if (mail.equals(user.getMail()))
                return user;
         }
         return null;
     }
 
     public void changeUser (@NotNull UserProfile currentUser, @NotNull String type, @NotNull String value){
-        if (type.equals("login")){
-            userNameToUserProfile.remove(currentUser.getLogin(),currentUser);
-            currentUser.setLogin(value);
-            userNameToUserProfile.put(currentUser.getLogin(), currentUser);
-        }
-        else if (type.equals("mail")){
-            currentUser.setMail(value);
-        }
-        else if (type.equals("password")) {
-            currentUser.setPassword(value);
+        switch (type){
+            case "login":
+                userNameToUserProfile.remove(currentUser.getLogin(),currentUser);
+                currentUser.setLogin(value);
+                userNameToUserProfile.put(currentUser.getLogin(), currentUser);
+                break;
+            case"mail":
+                currentUser.setMail(value);
+                break;
+            case "password":
+                currentUser.setPassword(value);
+                break;
+            default: break;
         }
     }
 

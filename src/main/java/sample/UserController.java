@@ -1,39 +1,34 @@
 package sample;
 
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;import javax.servlet.http.HttpServletResponse;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
+import java.lang.reflect.*;
 
 
 
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 
 /**
  * Created by Fedorova on 20/02/2017.
  */
+@SuppressWarnings("unused")
 @RestController
 public class UserController {
 
     @NotNull
-    @Autowired
     private final AccountService accountService;
-    private Map<Long, String> userIdToUserCookie = new HashMap<>();
+    private final Class PaswordEncoder;
+    private Method passwordEncoder;
 
 
     @RequestMapping(path = "api/registration", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-    public ResponseEntity<?> Registration(@RequestBody GetBody body, HttpSession httpSession)  {
+    public ResponseEntity<?> registration(@RequestBody GetBody body, HttpSession httpSession) throws InvocationTargetException, IllegalAccessException {
         final String login = body.getLogin();
         final String password = body.getPassword();
         final String mail = body.getMail();
@@ -41,38 +36,37 @@ public class UserController {
         if(accountService.getUserByLogin(login)  != null)
             return  ResponseEntity.status(HttpStatus.CONFLICT).body("{\"error\": \"Login already exist\" }");
         if(accountService.getUserByMail(mail) != null)
-            return  ResponseEntity.status(HttpStatus.CONFLICT).body("{\"Email\": \"already exist\" }");
-        UserProfile currentUser = accountService.register(mail, login, passwordEncoder().encode(password));
-        userIdToUserCookie.put(currentUser.getId(), httpSession.getId());
+            return  ResponseEntity.status(HttpStatus.CONFLICT).body("{\"error\": \"Email already exist\" }");
+        final PasswordEncoder passEncoder = (PasswordEncoder) passwordEncoder.invoke(PaswordEncoder);
+        accountService.register(mail, login, passEncoder.encode(password));
         httpSession.setAttribute("Login", login);
         return ResponseEntity.ok("{\"OK\": \"OK\"}");
     }
 
     @RequestMapping(path = "api/login", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-    public ResponseEntity<?> Login(@RequestBody GetBody body, HttpSession httpSession)  {
+    public ResponseEntity<?> login(@RequestBody GetBody body, HttpSession httpSession) throws InvocationTargetException, IllegalAccessException {
         final String login = body.getLogin();
         final String password = body.getPassword();
-        UserProfile currentUser = accountService.getUserByLogin(login);
-
-        if(currentUser  == null)
+        final PasswordEncoder passEncoder = (PasswordEncoder) passwordEncoder.invoke(PaswordEncoder);
+        if(!accountService.verifylogin(login))
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Wrong login or password\"}");
-        if(passwordEncoder().matches(password, currentUser.getPassword())
-                & userIdToUserCookie.get(currentUser.getId()) == httpSession.getId()){
+        final UserProfile currentUser = accountService.getUserByLogin(login);
+        if(passEncoder.matches(password, currentUser.getPassword())){
             httpSession.setAttribute("Login", login);
             return ResponseEntity.ok("{\"OK\": \"OK\"}");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\":\"Wrong login or password\"}");
     }
 
-    @RequestMapping(path = "api/user", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    @RequestMapping(path = "api/user")
     public ResponseEntity<?> getUser (HttpSession httpSession){
-        String login = (String) httpSession.getAttribute("Login");
+        final String login = (String) httpSession.getAttribute("Login");
         if( login == null)
             return ResponseEntity.status(HttpStatus.OK).body("{\"Login\": \"User not found\"}");
         return ResponseEntity.status(HttpStatus.OK).body("{\"Login\": \"" + login + "\"}");
     }
 
-    @RequestMapping(path = "api/logout", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    @RequestMapping(path = "api/logout")
     public ResponseEntity<?> logout( HttpSession httpSession)  {
         if(httpSession.getAttribute("Login") == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User is not authorized\"}");
@@ -82,30 +76,32 @@ public class UserController {
 
     @RequestMapping(path = "api/settings", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> editUser(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
-        String login = (String) httpSession.getAttribute("Login");
-        UserProfile currentUser = accountService.getUserByLogin(login);
+        final String login = (String) httpSession.getAttribute("Login");
+        final UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found\"}");
-        String type = body.getType();
-        String value = body.getValue();
-        if( type == null & type.equals(""))
+        final String type = body.getType();
+        final String value = body.getValue();
+        if( type == null && type.isEmpty())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty type\"}");
-        if( value == null & value.equals(""))
+        if( value == null && value.isEmpty())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty value\"}");
+        if(accountService.verifylogin(login))
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"error\": \"Login already exist\"}");
         accountService.changeUser(currentUser, type, value);
-        httpSession.setAttribute("Login", currentUser.getLogin());
+        if (type.equals("login")) httpSession.setAttribute("Login", currentUser.getLogin());
         return ResponseEntity.ok("{\"OK\": \"OK\"}");
     }
 
     @RequestMapping(path = "api/setscore", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> setScore(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
-        String login = (String) httpSession.getAttribute("Login");
+        final String login = (String) httpSession.getAttribute("Login");
         if(login == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty user\"}");
-        UserProfile currentUser = accountService.getUserByLogin(login);
+        final UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found\"}");
-        Integer score = body.getScore();
+        final Integer score = body.getScore();
         if(score == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty score\"}");
         accountService.changeScore(currentUser, body.getScore());
@@ -113,24 +109,28 @@ public class UserController {
 
     }
 
-    @RequestMapping(path = "api/getscore", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    @RequestMapping(path = "api/getscore")
     public ResponseEntity<?> getScore (HttpSession httpSession){
-        String login = (String) httpSession.getAttribute("Login");
+        final String login = (String) httpSession.getAttribute("Login");
         if(login == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty user\"}");
-        UserProfile currentUser = accountService.getUserByLogin(login);
+        final UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found\"}");
         return  ResponseEntity.status(HttpStatus.OK).body("{\"score\":\"" + currentUser.getScore() + "\"}");
     }
 
-    @Autowired
-    public UserController(@NotNull AccountService accountService) {
+    @SuppressWarnings("All")
+    public UserController(@NotNull AccountService accountService) throws NoSuchMethodException, ClassNotFoundException{
         this.accountService = accountService;
+        this.PaswordEncoder = Class.forName("sample.Application");
+        this.passwordEncoder = this.PaswordEncoder.getMethod("passwordEncoder", null);
     }
 
     private static final class GetBody {
-        private String mail, login, password;
+        private final String mail;
+        private final String login;
+        private final String password;
 
         @JsonCreator
         @SuppressWarnings({"unused", "null"})
@@ -154,8 +154,9 @@ public class UserController {
     }
 
     private static final class GetBodySettings {
-        private String  type, value;
-        private Integer score;
+        private final String  type;
+        private final String  value;
+        private final Integer score;
 
         @JsonCreator
         @SuppressWarnings({"unused", "null"})
@@ -178,8 +179,5 @@ public class UserController {
         }
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
 }
