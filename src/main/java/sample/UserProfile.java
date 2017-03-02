@@ -1,7 +1,6 @@
 package sample;
 
 import javax.validation.constraints.NotNull;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by Fedorova on 20/02/2017.
