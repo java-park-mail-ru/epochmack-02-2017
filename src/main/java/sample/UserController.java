@@ -75,16 +75,16 @@ public class UserController {
     }
 
     @RequestMapping(path = "api/settings", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-    public ResponseEntity<?> editUser(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
+    public ResponseEntity<?> editUser(@RequestBody GetBodySettings body,  HttpSession httpSession) throws NullPointerException {
         final String login = (String) httpSession.getAttribute("Login");
         final UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found\"}");
         final String type = body.getType();
         final String value = body.getValue();
-        if( type == null && type.isEmpty())
+        if( type == null || type.isEmpty())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty type\"}");
-        if( value == null && value.isEmpty())
+        if( value == null || value.isEmpty())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Empty value\"}");
         if(accountService.verifylogin(login))
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"error\": \"Login already exist\"}");
@@ -120,11 +120,12 @@ public class UserController {
         return  ResponseEntity.status(HttpStatus.OK).body("{\"score\":\"" + currentUser.getScore() + "\"}");
     }
 
-    @SuppressWarnings("All")
+
     public UserController(@NotNull AccountService accountService) throws NoSuchMethodException, ClassNotFoundException{
         this.accountService = accountService;
         this.PaswordEncoder = Class.forName("sample.Application");
-        this.passwordEncoder = this.PaswordEncoder.getMethod("passwordEncoder", null);
+        final  Class[] param = new Class[]{};
+        this.passwordEncoder = this.PaswordEncoder.getMethod("passwordEncoder", param);
     }
 
     private static final class GetBody {
