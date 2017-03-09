@@ -62,14 +62,14 @@ public class UserController {
     public ResponseEntity<?> getUser (HttpSession httpSession){
         final String login = (String) httpSession.getAttribute("Login");
         if( login == null)
-            return new LoginResponse("User not found").getMessage();
+            return new ErrorResponse(HttpStatus.CONFLICT, "User not found").getMessage();
         return new LoginResponse(login).getMessage();
     }
 
     @GetMapping("api/logout")
     public ResponseEntity<?> logout( HttpSession httpSession)  {
         if(httpSession.getAttribute("Login") == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"User is not authorized").getMessage();
+            return  new ErrorResponse(HttpStatus.CONFLICT,"User is not authorized").getMessage();
         httpSession.removeAttribute("Login");
         return new OkResponse().getMessage();
     }
