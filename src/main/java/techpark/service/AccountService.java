@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
 import techpark.user.UserProfile;
@@ -50,7 +51,7 @@ public class AccountService {
                 currentUser.setLogin(value);
                 userNameToUserProfile.put(currentUser.getLogin(), currentUser);
                 break;
-            case"mail":
+            case "mail":
                 currentUser.setMail(value);
                 break;
             case "password":
@@ -63,6 +64,10 @@ public class AccountService {
     public void changeScore (@NotNull UserProfile currentUser, @NotNull Integer score){
         if(currentUser.getScore() < score)
             currentUser.setScore(score);
+    }
+
+    public LinkedList<UserProfile> getAllUsers() {
+        return new LinkedList<>(userNameToUserProfile.values());
     }
 
 }

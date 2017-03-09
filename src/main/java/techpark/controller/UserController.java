@@ -15,6 +15,7 @@ import techpark.jsonResponse.* ;
 
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.InvocationTargetException;
+import java.util.LinkedList;
 
 /**
  * Created by Fedorova on 20/02/2017.
@@ -48,13 +49,13 @@ public class UserController {
         final String login = body.getLogin();
         final String password = body.getPassword();
         if(!accountService.verifylogin(login))
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"Wrong login or password").getMessage();
+            return  new ErrorResponse(HttpStatus.BAD_REQUEST,"Wrong login or password").getMessage();
         final UserProfile currentUser = accountService.getUserByLogin(login);
         if(passwordEncoder.matches(password, currentUser.getPassword())){
             httpSession.setAttribute("Login", login);
             return new OkResponse().getMessage();
         }
-        return  new ErrorResponse(HttpStatus.NOT_FOUND,"Wrong login or password").getMessage();
+        return  new ErrorResponse(HttpStatus.BAD_REQUEST,"Wrong login or password").getMessage();
     }
 
     @GetMapping("api/user")
@@ -119,6 +120,11 @@ public class UserController {
         return new ScoreResponse(currentUser.getScore()).getMessage();
     }
 
+    @GetMapping("api/users")
+    public ResponseEntity<?> getUsers(HttpSession httpSession) {
+        final LinkedList<UserProfile> users = accountService.getAllUsers();
+        return new UsersListResponse(users).getMessage();
+    }
 
     public UserController(@NotNull AccountService accountService, @NotNull PasswordEncoder passwordEncoder) {
         this.accountService = accountService;
