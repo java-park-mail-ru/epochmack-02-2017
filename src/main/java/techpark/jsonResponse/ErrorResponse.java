@@ -7,18 +7,11 @@ import org.springframework.http.ResponseEntity;
 /**
  * Created by Fedorova on 05.03.2017.
  */
-public class ErrorResponse implements Message{
-    private final HttpStatus code;
-    private final String text;
+public class ErrorResponse extends Response {
+    public final String error;
 
-    public ErrorResponse(HttpStatus code, String text){
-        this.code = code;
-        this.text = text;
-    }
-
-
-    @Override
-    public ResponseEntity<?> getMessage(){
-        return new ResponseEntity<>("{\"error\": \"" + this.text + "\"}", this.code);
+    public ErrorResponse(String text) {
+        super("error");
+        this.error = text;
     }
 }

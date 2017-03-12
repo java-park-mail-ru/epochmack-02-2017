@@ -13,7 +13,6 @@ public class UserProfile {
     private String password;
     private Integer hightScore;
 
-
     public UserProfile(@NotNull String mail, @NotNull String login, @NotNull String password){
         this.mail = mail;
         this.login = login;

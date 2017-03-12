@@ -6,15 +6,11 @@ import org.springframework.http.ResponseEntity;
 /**
  * Created by Fedorova on 05.03.2017.
  */
-public class ScoreResponse implements Message {
-    int score;
+public class ScoreResponse extends Response {
+    public final int score;
 
     public ScoreResponse(int score){
+        super("ok");
         this.score = score;
-    }
-
-    @Override
-    public ResponseEntity<?> getMessage() {
-        return new ResponseEntity<>("{\"score\": \"" + this.score + "\"}", HttpStatus.OK);
     }
 }

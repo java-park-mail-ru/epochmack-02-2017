@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import techpark.service.AccountService;
 import techpark.user.UserProfile;
 import techpark.jsonResponse.* ;
+import techpark.user.UserToInfo;
 
 
 import javax.servlet.http.HttpSession;
@@ -36,12 +37,12 @@ public class UserController {
         final String mail = body.getMail();
 
         if(accountService.getUserByLogin(login)  != null)
-            return  new ErrorResponse(HttpStatus.CONFLICT, "Login already exist").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("Login already exist"), HttpStatus.CONFLICT);
         if(accountService.getUserByMail(mail) != null)
-            return  new ErrorResponse(HttpStatus.CONFLICT,"Email already exist").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("E-mail already exist"), HttpStatus.CONFLICT);
         accountService.register(mail, login, passwordEncoder.encode(password));
         httpSession.setAttribute("Login", login);
-        return new OkResponse().getMessage();
+        return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
     }
 
     @PostMapping("api/login")
@@ -49,29 +50,29 @@ public class UserController {
         final String login = body.getLogin();
         final String password = body.getPassword();
         if(!accountService.verifylogin(login))
-            return  new ErrorResponse(HttpStatus.BAD_REQUEST,"Wrong login or password").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("Wrong login or password"), HttpStatus.BAD_REQUEST);
         final UserProfile currentUser = accountService.getUserByLogin(login);
         if(passwordEncoder.matches(password, currentUser.getPassword())){
             httpSession.setAttribute("Login", login);
-            return new OkResponse().getMessage();
+            return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
         }
-        return  new ErrorResponse(HttpStatus.BAD_REQUEST,"Wrong login or password").getMessage();
+        return new ResponseEntity<>(new ErrorResponse("Wrong login or password"), HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("api/user")
     public ResponseEntity<?> getUser (HttpSession httpSession){
         final String login = (String) httpSession.getAttribute("Login");
         if( login == null)
-            return new ErrorResponse(HttpStatus.CONFLICT, "User not found").getMessage();
-        return new LoginResponse(login).getMessage();
+            return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.CONFLICT);
+        return new ResponseEntity<>(new LoginResponse(login), HttpStatus.OK);
     }
 
     @GetMapping("api/logout")
     public ResponseEntity<?> logout( HttpSession httpSession)  {
         if(httpSession.getAttribute("Login") == null)
-            return  new ErrorResponse(HttpStatus.CONFLICT,"User is not authorized").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("User is not authorized"), HttpStatus.CONFLICT);
         httpSession.removeAttribute("Login");
-        return new OkResponse().getMessage();
+        return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
     }
 
     @PostMapping("api/settings")
@@ -79,51 +80,50 @@ public class UserController {
         final String login = (String) httpSession.getAttribute("Login");
         final UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"User not found").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.NOT_FOUND);
         final String type = body.getType();
         final String value = body.getValue();
         if( type == null || type.isEmpty())
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"Empty type").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("Empty type"), HttpStatus.NOT_FOUND);
         if( value == null || value.isEmpty())
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"Empty value").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("Empty value"), HttpStatus.NOT_FOUND);
         if(accountService.verifylogin(login))
-            return  new ErrorResponse(HttpStatus.CONFLICT,"Login already exist").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("Login already exist"), HttpStatus.CONFLICT);
         accountService.changeUser(currentUser, type, value);
         if (type.equals("login")) httpSession.setAttribute("Login", currentUser.getLogin());
-        return new OkResponse().getMessage();
+        return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
     }
 
     @PostMapping("api/setscore")
     public ResponseEntity<?> setScore(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
         final String login = (String) httpSession.getAttribute("Login");
         if(login == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"Empty user").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("Empty user"), HttpStatus.NOT_FOUND);
         final UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"User not found").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.NOT_FOUND);
         final Integer score = body.getScore();
         if(score == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"Empty score").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("Empty score"), HttpStatus.NOT_FOUND);
         accountService.changeScore(currentUser, body.getScore());
-        return new OkResponse().getMessage();
-
+        return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
     }
 
     @GetMapping("api/getscore")
     public ResponseEntity<?> getScore (HttpSession httpSession){
         final String login = (String) httpSession.getAttribute("Login");
         if(login == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"Empty user").getMessage();
+            return new ResponseEntity<>(new ErrorResponse("Empty user"), HttpStatus.NOT_FOUND);
         final UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"User not found").getMessage();
-        return new ScoreResponse(currentUser.getScore()).getMessage();
+            return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
     }
 
     @GetMapping("api/users")
     public ResponseEntity<?> getUsers(HttpSession httpSession) {
-        final LinkedList<UserProfile> users = accountService.getAllUsers();
-        return new UsersListResponse(users).getMessage();
+        final LinkedList<UserToInfo> users = accountService.getAllUsers();
+        return new ResponseEntity<>(new UsersListResponse(users), HttpStatus.OK);
     }
 
     public UserController(@NotNull AccountService accountService, @NotNull PasswordEncoder passwordEncoder) {
