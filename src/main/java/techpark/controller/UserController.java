@@ -21,6 +21,8 @@ import java.util.LinkedList;
 /**
  * Created by Fedorova on 20/02/2017.
  */
+
+@CrossOrigin(origins = {"http://localhost:3000", "https://gem-td.herokuapp.com/", "http://gem-td.herokuapp.com/"})
 @SuppressWarnings("unused")
 @RestController
 public class UserController {
