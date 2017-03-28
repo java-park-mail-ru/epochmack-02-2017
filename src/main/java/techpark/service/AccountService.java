@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
 import techpark.user.UserProfile;
+import techpark.user.UserToInfo;
 
 /**
  * Created by Fedorova on 20/02/2017.
@@ -66,8 +67,13 @@ public class AccountService {
             currentUser.setScore(score);
     }
 
-    public LinkedList<UserProfile> getAllUsers() {
-        return new LinkedList<>(userNameToUserProfile.values());
+    public LinkedList<UserToInfo> getAllUsers() {
+        LinkedList<UserProfile> profiles = new LinkedList<>(userNameToUserProfile.values());
+        LinkedList<UserToInfo> users = new LinkedList<UserToInfo>();
+        for (UserProfile profile : profiles) {
+            users.add(new UserToInfo(profile));
+        }
+        return users;
     }
 
 }
