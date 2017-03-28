@@ -79,15 +79,15 @@ public class UserController {
         final String login = (String) httpSession.getAttribute("Login");
         final UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"User not found").getMessage();
+            return  new ErrorResponse(HttpStatus.CONFLICT,"User not found").getMessage();
         final String type = body.getType();
         final String value = body.getValue();
         if( type == null || type.isEmpty())
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"Empty type").getMessage();
+            return  new ErrorResponse(HttpStatus.BAD_REQUEST,"Empty type").getMessage();
         if( value == null || value.isEmpty())
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"Empty value").getMessage();
+            return  new ErrorResponse(HttpStatus.BAD_REQUEST,"Empty value").getMessage();
         if(accountService.verifylogin(login))
-            return  new ErrorResponse(HttpStatus.CONFLICT,"Login already exist").getMessage();
+            return  new ErrorResponse(HttpStatus.IM_USED,"Login already exist").getMessage();
         accountService.changeUser(currentUser, type, value);
         if (type.equals("login")) httpSession.setAttribute("Login", currentUser.getLogin());
         return new OkResponse().getMessage();
@@ -97,13 +97,13 @@ public class UserController {
     public ResponseEntity<?> setScore(@RequestBody GetBodySettings body,  HttpSession httpSession)  {
         final String login = (String) httpSession.getAttribute("Login");
         if(login == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"Empty user").getMessage();
+            return  new ErrorResponse(HttpStatus.BAD_REQUEST,"Empty user").getMessage();
         final UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"User not found").getMessage();
+            return  new ErrorResponse(HttpStatus.CONFLICT,"User not found").getMessage();
         final Integer score = body.getScore();
         if(score == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"Empty score").getMessage();
+            return  new ErrorResponse(HttpStatus.BAD_REQUEST,"Empty score").getMessage();
         accountService.changeScore(currentUser, body.getScore());
         return new OkResponse().getMessage();
 
@@ -113,10 +113,10 @@ public class UserController {
     public ResponseEntity<?> getScore (HttpSession httpSession){
         final String login = (String) httpSession.getAttribute("Login");
         if(login == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"Empty user").getMessage();
+            return  new ErrorResponse(HttpStatus.BAD_REQUEST,"Empty user").getMessage();
         final UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
-            return  new ErrorResponse(HttpStatus.NOT_FOUND,"User not found").getMessage();
+            return  new ErrorResponse(HttpStatus.CONFLICT,"User not found").getMessage();
         return new ScoreResponse(currentUser.getScore()).getMessage();
     }
 
