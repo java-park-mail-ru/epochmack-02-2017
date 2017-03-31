@@ -28,13 +28,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE)
-@Transactional
 public class TestUserController {
 
     @Autowired
     protected MockMvc mockMvc;
 
-    private final UserProfile user = new UserProfile("mail", "login", "password");
+    private final UserProfile user = new UserProfile("mail", "login", "password", null);
 
    @Before
     public void addUser() throws Exception{

@@ -15,11 +15,12 @@ public class UserProfile {
     private String password;
     private Integer hightScore;
 
-    public UserProfile(@NotNull String mail, @NotNull String login, @NotNull String password){
+    public UserProfile(@NotNull String mail, @NotNull String login, @NotNull String password,
+                       @Nullable Integer score){
         this.mail = mail;
         this.login = login;
         this.password = password;
-        this.hightScore = 0;
+        this.hightScore = score == null ? 0 :  score;
     }
 
     public void setScore(Integer score){

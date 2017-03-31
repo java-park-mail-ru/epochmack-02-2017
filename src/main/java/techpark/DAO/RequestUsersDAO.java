@@ -12,7 +12,7 @@ import java.util.LinkedList;
  */
 public interface RequestUsersDAO {
 
-    public void addUser(String login, String mail, String password);
+    public int addUser(String login, String mail, String password);
 
     public boolean verifyMail(String mail);
 
@@ -20,7 +20,7 @@ public interface RequestUsersDAO {
 
     public String changeUser(@NotNull String oldLogin, @Nullable String login, @Nullable String mail, @Nullable String password);
 
-    public boolean changeScore(Integer score, String login);
+    public void changeScore(Integer score, String login);
 
     public Integer getScore(String login);
 
