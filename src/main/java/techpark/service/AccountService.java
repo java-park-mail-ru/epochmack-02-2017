@@ -3,77 +3,67 @@ package techpark.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.transaction.annotation.Transactional;
+import techpark.DAO.RequestUsersDAO;
+import techpark.DBconnect.DBConnect;
 import techpark.user.UserProfile;
 import techpark.user.UserToInfo;
+
+import javax.sql.DataSource;
 
 /**
  * Created by Fedorova on 20/02/2017.
  */
+
+@Transactional
 @Service
-public class AccountService {
+public class AccountService extends DBConnect{
 
-    private Map<String, UserProfile> userNameToUserProfile = new HashMap<>();
+    @Autowired
+    private RequestUsersDAO usersDAO;
 
-    @NotNull
-    public UserProfile register(@NotNull  String mail, @NotNull  String login, @NotNull  String password) {
+    @Autowired
+    public AccountService(DataSource dataSource){this.dataSource = dataSource;}
 
-        final UserProfile currentUser = new UserProfile(mail, login, password);
-        userNameToUserProfile.put(login, currentUser);
+    private Map<String, UserProfile> userNameToUserProfile;
 
-        return currentUser;
+    public AccountService() {
+        userNameToUserProfile = new HashMap<>();
     }
 
-    public boolean verifylogin(@NotNull String login) {
-        return ( userNameToUserProfile.containsKey(login));
+    public void register(@NotNull  String mail, @NotNull  String login, @NotNull  String password) {
+        if (usersDAO==null) System.out.println("DAO");
+        usersDAO.addUser(mail, login, password);
+    }
+
+    public boolean verifyMail(@NotNull String mail) {
+        return ( usersDAO.verifyMail(mail));
     }
 
     public UserProfile getUserByLogin(@NotNull String login){
         return userNameToUserProfile.get(login);
     }
 
-    @Nullable
-    public UserProfile getUserByMail(@NotNull String mail){
-        for(UserProfile user: userNameToUserProfile.values()){
-           if (mail.equals(user.getMail()))
-               return user;
-        }
-        return null;
-    }
-
-    public void changeUser (@NotNull UserProfile currentUser, @NotNull String type, @NotNull String value){
-        switch (type){
-            case "login":
-                userNameToUserProfile.remove(currentUser.getLogin(),currentUser);
-                currentUser.setLogin(value);
-                userNameToUserProfile.put(currentUser.getLogin(), currentUser);
-                break;
-            case "mail":
-                currentUser.setMail(value);
-                break;
-            case "password":
-                currentUser.setPassword(value);
-                break;
-            default: break;
-        }
+    public String changeUser (@NotNull String oldLogin, @Nullable String login, @Nullable String  mail, @Nullable String password){
+        return usersDAO.changeUser(oldLogin, login, mail, password);
     }
 
     public void changeScore (@NotNull UserProfile currentUser, @NotNull Integer score){
         if(currentUser.getScore() < score)
-            currentUser.setScore(score);
+            usersDAO.changeScore(score, currentUser.getLogin());
     }
 
+    public Integer getScore (@NotNull String login){return usersDAO.getScore(login);}
+
     public LinkedList<UserToInfo> getAllUsers() {
-        LinkedList<UserProfile> profiles = new LinkedList<>(userNameToUserProfile.values());
-        LinkedList<UserToInfo> users = new LinkedList<UserToInfo>();
-        for (UserProfile profile : profiles) {
-            users.add(new UserToInfo(profile));
-        }
-        return users;
+        return usersDAO.getBestUsers();
     }
 
 }

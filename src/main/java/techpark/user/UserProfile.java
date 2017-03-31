@@ -1,5 +1,7 @@
 package techpark.user;
 
+import org.jetbrains.annotations.Nullable;
+
 import javax.validation.constraints.NotNull;
 
 /**

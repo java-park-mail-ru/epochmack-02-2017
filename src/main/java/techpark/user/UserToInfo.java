@@ -7,8 +7,8 @@ public class UserToInfo {
     public final String login;
     public final int score;
 
-    public UserToInfo(UserProfile user) {
-        this.login = user.getLogin();
-        this.score = user.getScore();
+    public UserToInfo(String login, int score) {
+        this.login = login;
+        this.score = score;
     }
 }
