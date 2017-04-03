@@ -1,4 +1,4 @@
-package techpark.App;
+package techpark.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,7 +10,7 @@ import techpark.Application;
  */
 @SpringBootApplication
 @Import(Application.class)
-public class TestApplication {
+public class ApplicationTest {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }

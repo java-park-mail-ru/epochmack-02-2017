@@ -3,23 +3,16 @@ package techpark.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.transaction.annotation.Transactional;
-import techpark.DAO.RequestUsersDAO;
 import techpark.DAO.RequestUsersDAOImpl;
-import techpark.DBconnect.DBConnect;
 import techpark.user.UserProfile;
 import techpark.user.UserToInfo;
 
-import javax.sql.DataSource;
 
 /**
  * Created by Fedorova on 20/02/2017.
@@ -31,7 +24,6 @@ public class AccountService {
 
     private final RequestUsersDAOImpl usersDAO;
 
-    //@Autowired
     public AccountService(JdbcTemplate jdbcTemplate) {
         this.usersDAO = new RequestUsersDAOImpl(jdbcTemplate);
     }
@@ -45,11 +37,12 @@ public class AccountService {
         return ( usersDAO.verifyMail(mail));
     }
 
+    @Nullable
     public UserProfile getUserByLogin(@NotNull String login){
-       // return userNameToUserProfile.get(login);
         return usersDAO.getUserByLogin(login);
     }
 
+    @Nullable
     public String changeUser (@NotNull String oldLogin, @Nullable String login, @Nullable String  mail, @Nullable String password){
         return usersDAO.changeUser(oldLogin, login, mail, password);
     }
@@ -59,7 +52,7 @@ public class AccountService {
             usersDAO.changeScore(score, currentUser.getLogin());
     }
 
-    public Integer getScore (@NotNull String login){return usersDAO.getScore(login);}
+    public int getScore (@NotNull String login){return usersDAO.getScore(login);}
 
     public LinkedList<UserToInfo> getAllUsers() {
         return usersDAO.getBestUsers();

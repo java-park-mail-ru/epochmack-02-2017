@@ -22,9 +22,9 @@ import java.util.LinkedList;
  * Created by Fedorova on 20/02/2017.
  */
 
+@RestController
 @CrossOrigin(origins = {"http://localhost:3000", "https://gem-td.herokuapp.com", "http://gem-td.herokuapp.com"})
 @SuppressWarnings("unused")
-@RestController
 public class UserController {
 
     @NotNull
@@ -84,8 +84,9 @@ public class UserController {
     @PostMapping("api/settings")
     public ResponseEntity<?> editUser(@RequestBody GetBody body,  HttpSession httpSession) throws NullPointerException {
         final String login = (String) httpSession.getAttribute("Login");
+        final String password = body.getPassword()==null ? "1" : body.getPassword();
         final String result = accountService.changeUser(login, body.getLogin(), body.getMail(),
-                passwordEncoder.encode(body.getPassword()));
+                passwordEncoder.encode(password));
         if(result == null)
             return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.NOT_FOUND);
         if(result.equals("Login already exist"))
@@ -118,7 +119,7 @@ public class UserController {
         final UserProfile currentUser = accountService.getUserByLogin(login);
         if(currentUser == null)
             return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.NOT_FOUND);
-        final Integer score = accountService.getScore(login);
+        final int score = accountService.getScore(login);
         return new ResponseEntity<>(new ScoreResponse(score), HttpStatus.OK);
     }
 

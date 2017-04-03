@@ -12,17 +12,17 @@ import java.util.LinkedList;
  */
 public interface RequestUsersDAO {
 
-    public int addUser(String login, String mail, String password);
+    int addUser(String login, String mail, String password);
 
-    public boolean verifyMail(String mail);
+    boolean verifyMail(String mail);
 
-    public UserProfile getUserByLogin(String login);
+    UserProfile getUserByLogin(String login);
 
-    public String changeUser(@NotNull String oldLogin, @Nullable String login, @Nullable String mail, @Nullable String password);
+    String changeUser(@NotNull String oldLogin, @Nullable String login, @Nullable String mail, @Nullable String password);
 
-    public void changeScore(Integer score, String login);
+    void changeScore(Integer score, String login);
 
-    public Integer getScore(String login);
+    int getScore(String login);
 
-    public LinkedList<UserToInfo> getBestUsers();
+    LinkedList<UserToInfo> getBestUsers();
 }
