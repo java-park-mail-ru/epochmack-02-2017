@@ -3,10 +3,11 @@ package techpark.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import org.springframework.transaction.annotation.Transactional;
 import techpark.DAO.RequestUsersDAOImpl;
@@ -29,32 +30,38 @@ public class AccountService {
     }
 
 
-    public int register(@NotNull  String mail, @NotNull  String login, @NotNull  String password) {
+    public boolean register(@NotNull String mail, @NotNull String login, @NotNull String password)
+            throws DataAccessException {
         return usersDAO.addUser(mail, login, password);
     }
 
-    public boolean verifyMail(@NotNull String mail) {
-        return ( usersDAO.verifyMail(mail));
+    public boolean verifyMail(@NotNull String mail)
+            throws DataAccessException {
+        return (usersDAO.verifyMail(mail));
     }
 
     @Nullable
-    public UserProfile getUserByLogin(@NotNull String login){
+    public UserProfile getUserByLogin(@NotNull String login)
+            throws DataAccessException {
         return usersDAO.getUserByLogin(login);
     }
 
-    @Nullable
-    public String changeUser (@NotNull String oldLogin, @Nullable String login, @Nullable String  mail, @Nullable String password){
-        return usersDAO.changeUser(oldLogin, login, mail, password);
+    public boolean changeUser(@NotNull UserProfile user, @Nullable String login, @Nullable String mail,
+                             @Nullable String password) throws DataAccessException  {
+        return usersDAO.changeUser(user, login, mail, password);
     }
 
-    public void changeScore (@NotNull UserProfile currentUser, @NotNull Integer score){
-        if(currentUser.getScore() < score)
+    public void changeScore(@NotNull UserProfile currentUser, @NotNull Integer score)
+            throws DataAccessException  {
+        if (currentUser.getScore() < score)
             usersDAO.changeScore(score, currentUser.getLogin());
     }
 
-    public int getScore (@NotNull String login){return usersDAO.getScore(login);}
+    public int getScore(@NotNull String login) {
+        return usersDAO.getScore(login);
+    }
 
-    public LinkedList<UserToInfo> getAllUsers() {
+    public ArrayList<UserToInfo> getAllUsers() throws DataAccessException   {
         return usersDAO.getBestUsers();
     }
 

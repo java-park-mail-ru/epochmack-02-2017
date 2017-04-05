@@ -1,4 +1,4 @@
-package techpark.jsonResponse;
+package techpark.jsonresponse;
 
 /**
  * Created by yaches on 12.03.17.

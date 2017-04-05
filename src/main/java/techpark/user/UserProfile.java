@@ -23,17 +23,10 @@ public class UserProfile {
         this.hightScore = score == null ? 0 :  score;
     }
 
-    public void setScore(Integer score){
-        this.hightScore = score;
-    }
-
     public String getMail(){
         return mail;
     }
 
-    public void setMail(String mail){
-        this.mail = mail;
-    }
 
     public String getLogin(){
         return login;
@@ -45,10 +38,6 @@ public class UserProfile {
 
     public String getPassword(){
         return password;
-    }
-
-    public void setPassword(String password){
-        this.password = password;
     }
 
     public Integer getScore(){

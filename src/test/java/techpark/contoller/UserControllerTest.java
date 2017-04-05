@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 public class UserControllerTest {
 
+    @SuppressWarnings("SpringJavaAutowiredMembersInspection")
     @Autowired
     protected MockMvc mockMvc;
 

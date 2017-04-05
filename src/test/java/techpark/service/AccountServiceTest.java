@@ -11,7 +11,7 @@ import techpark.Application;
 import techpark.user.UserProfile;
 import techpark.user.UserToInfo;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 
@@ -19,12 +19,12 @@ import static org.junit.Assert.*;
  * Created by Варя on 30.03.2017.
  */
 
-@SuppressWarnings("ConstantConditions")
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @Transactional
 public class AccountServiceTest {
 
+    @SuppressWarnings("SpringJavaAutowiredMembersInspection")
     @Autowired
     private AccountService accountService;
 
@@ -42,9 +42,7 @@ public class AccountServiceTest {
     @Test
     public void testRegister(){
         final UserProfile user = new UserProfile("mail4", "login4", "password4", null);
-        assertNotNull(user);
-        final int row = accountService.register(user.getMail(), user.getLogin(), user.getPassword());
-        assertEquals(1, row);
+        accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         final UserProfile userByLogin = accountService.getUserByLogin("login4");
         assertNotNull(userByLogin);
         assertEquals(user.getLogin(),userByLogin.getLogin());
@@ -54,7 +52,6 @@ public class AccountServiceTest {
     @Test
     public void testVerifyLogin(){
         final UserProfile user = new UserProfile("mail4", "login4", "password4", null);
-        assertNotNull(user);
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         assertTrue(accountService.verifyMail(user.getMail()));
     }
@@ -62,7 +59,6 @@ public class AccountServiceTest {
     @Test
     public void testGetUserByLogin(){
         final UserProfile user = new UserProfile("mail5", "login5", "password5", null);
-        assertNotNull(user);
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         final UserProfile userByLogin = accountService.getUserByLogin("login5");
         assertNotNull(userByLogin);
@@ -73,9 +69,8 @@ public class AccountServiceTest {
     @Test
     public void testChangeUser(){
         final UserProfile user = new UserProfile("mail6", "login6", "password6", null);
-        assertNotNull(user);
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
-        assertEquals("Ok", accountService.changeUser(user.getLogin(), "newlogin", "newmail", "newpassword"));
+        assertTrue(accountService.changeUser(user, "newlogin", "newmail", "newpassword"));
         final UserProfile changeUser = accountService.getUserByLogin("newlogin");
         assertNotNull(changeUser);
         assertEquals("newlogin", changeUser.getLogin());
@@ -87,9 +82,8 @@ public class AccountServiceTest {
     @Test
     public void testChangeUserNotAll(){
         final UserProfile user = new UserProfile("mail7", "login7", "password7", null);
-        assertNotNull(user);
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
-        assertEquals("Ok", accountService.changeUser(user.getLogin(), "newlogin1", null, "newpassword1"));
+        assertTrue(accountService.changeUser(user, "newlogin1", null, "newpassword1"));
         final UserProfile changeUser = accountService.getUserByLogin("newlogin1");
         assertNotNull(changeUser);
         assertEquals("newlogin1", changeUser.getLogin());
@@ -112,7 +106,7 @@ public class AccountServiceTest {
         accountService.changeScore(user, 6);
         assertEquals(6, accountService.getScore("login1"));
         user = accountService.getUserByLogin("login1");
-        System.out.println(user.getScore());
+        assertNotNull(user);
         accountService.changeScore(user, 5);
         assertEquals(6, accountService.getScore("login1"));
     }
@@ -140,7 +134,7 @@ public class AccountServiceTest {
         user1 = accountService.getUserByLogin("login1");
         user2 = accountService.getUserByLogin("login2");
         user3 = accountService.getUserByLogin("login3");
-        final LinkedList<UserToInfo> bestUsers = accountService.getAllUsers();
+        final ArrayList<UserToInfo> bestUsers = accountService.getAllUsers();
         assertEquals(user3.getLogin(), bestUsers.get(0).login);
         assertEquals(user3.getScore().intValue(), bestUsers.get(0).score);
         assertEquals(user2.getLogin(), bestUsers.get(1).login);
