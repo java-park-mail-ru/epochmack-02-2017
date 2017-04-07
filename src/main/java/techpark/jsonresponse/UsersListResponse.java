@@ -9,7 +9,7 @@ import java.util.ArrayList;
  */
 public class UsersListResponse extends Response {
 
-    private final ArrayList<UserToInfo> users;
+    public final ArrayList<UserToInfo> users;
 
     public UsersListResponse(ArrayList<UserToInfo> users) {
         super("ok");
