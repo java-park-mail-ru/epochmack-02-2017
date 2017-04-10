@@ -28,7 +28,7 @@ public class AccountServiceTest {
 
     @SuppressWarnings("SpringJavaAutowiredMembersInspection")
     @Autowired
-    private AccountServiceImpl accountService;
+    private AccountService accountService;
 
 
     @Before

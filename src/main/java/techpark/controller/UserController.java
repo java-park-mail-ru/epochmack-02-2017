@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import techpark.exceptions.AccountServiceDBException;
 import techpark.exceptions.AccountServiceDDException;
-import techpark.service.AccountServiceImpl;
+import techpark.service.AccountService;
 import techpark.user.UserProfile;
 import techpark.jsonresponse.*;
 import techpark.user.UserToInfo;
@@ -29,7 +29,7 @@ import java.util.ArrayList;
 public class UserController {
 
     @NotNull
-    private final AccountServiceImpl accountService;
+    private final AccountService accountService;
     private final PasswordEncoder passwordEncoder;
 
     @ExceptionHandler(AccountServiceDBException.class)
@@ -155,7 +155,7 @@ public class UserController {
     }
 
 
-    public UserController(@NotNull AccountServiceImpl accountService, @NotNull PasswordEncoder passwordEncoder) {
+    public UserController(@NotNull AccountService accountService, @NotNull PasswordEncoder passwordEncoder) {
         this.accountService = accountService;
         this.passwordEncoder = passwordEncoder;
     }
