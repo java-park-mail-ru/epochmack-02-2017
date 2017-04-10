@@ -4,19 +4,19 @@ package techpark.controller;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import techpark.service.AccountService;
+import techpark.exceptions.AccountServiceDBException;
+import techpark.exceptions.AccountServiceDDException;
+import techpark.service.AccountServiceImpl;
 import techpark.user.UserProfile;
 import techpark.jsonresponse.*;
 import techpark.user.UserToInfo;
 
 
 import javax.servlet.http.HttpSession;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 /**
@@ -29,13 +29,21 @@ import java.util.ArrayList;
 public class UserController {
 
     @NotNull
-    private final AccountService accountService;
+    private final AccountServiceImpl accountService;
     private final PasswordEncoder passwordEncoder;
 
+    @ExceptionHandler(AccountServiceDBException.class)
+    @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
+    @ResponseBody
+    Response
+    handleDBException() {
+        return new ErrorResponse("Server error");
+    }
 
     @SuppressWarnings("OverlyComplexMethod")
     @PostMapping("api/registration")
-    public ResponseEntity<Response> registration(@RequestBody GetBody body, HttpSession httpSession) throws InvocationTargetException, IllegalAccessException {
+    public ResponseEntity<Response> registration(@RequestBody GetBody body, HttpSession httpSession)
+            throws AccountServiceDBException {
         final String login = body.getLogin();
         final String password = body.getPassword();
         final String mail = body.getMail();
@@ -45,30 +53,25 @@ public class UserController {
         if (login.length() < 5 || mail.isEmpty() || password.length() < 4)
             return new ResponseEntity<>(new ErrorResponse("Wrong data"), HttpStatus.BAD_REQUEST);
         try {
-            if (accountService.register(mail, login, passwordEncoder.encode(password))) {
-                httpSession.setAttribute("Login", login);
-                return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
-            }
+            accountService.register(mail, login, passwordEncoder.encode(password));
+            httpSession.setAttribute("Login", login);
+            return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
+
+        } catch (AccountServiceDDException e) {
             if (accountService.getUserByLogin(login) != null)
                 return new ResponseEntity<>(new ErrorResponse("Login already exist"), HttpStatus.CONFLICT);
             if (accountService.verifyMail(body.getMail()))
                 return new ResponseEntity<>(new ErrorResponse("E-mail already exist"), HttpStatus.CONFLICT);
-        } catch (DataAccessException e) {
-            return new ResponseEntity<>(new ErrorResponse("Connection error"), HttpStatus.EXPECTATION_FAILED);
         }
         return new ResponseEntity<>(new ErrorResponse("Server error"), HttpStatus.EXPECTATION_FAILED);
     }
 
     @PostMapping("api/login")
-    public ResponseEntity<Response> login(@RequestBody GetBody body, HttpSession httpSession) throws InvocationTargetException, IllegalAccessException {
+    public ResponseEntity<Response> login(@RequestBody GetBody body, HttpSession httpSession)
+            throws AccountServiceDBException {
         final String login = body.getLogin();
         final String password = body.getPassword();
-        final UserProfile currentUser;
-        try {
-            currentUser = accountService.getUserByLogin(login);
-        } catch (DataAccessException e) {
-            return new ResponseEntity<>(new ErrorResponse("Connection error"), HttpStatus.EXPECTATION_FAILED);
-        }
+        final UserProfile currentUser = accountService.getUserByLogin(login);
         if (currentUser != null) {
             if (passwordEncoder.matches(password, currentUser.getPassword())) {
                 httpSession.setAttribute("Login", login);
@@ -95,73 +98,64 @@ public class UserController {
     }
 
     @PostMapping("api/settings")
-    public ResponseEntity<Response> editUser(@RequestBody GetBody body, HttpSession httpSession) throws NullPointerException {
+    public ResponseEntity<Response> editUser(@RequestBody GetBody body, HttpSession httpSession)
+            throws AccountServiceDBException {
+        final String login = (String) httpSession.getAttribute("Login");
+        final String password = body.getPassword() == null ? "1" : body.getPassword();
+        final UserProfile user;
+        if ((user = accountService.getUserByLogin(login)) == null)
+            return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.NOT_FOUND);
         try {
-            final String login = (String) httpSession.getAttribute("Login");
-            final String password = body.getPassword() == null ? "1" : body.getPassword();
-            final UserProfile user;
-            if ((user = accountService.getUserByLogin(login)) == null)
-                return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.NOT_FOUND);
-            if (accountService.changeUser(user, body.getLogin(), body.getMail(),
-                    passwordEncoder.encode(password)))
-                return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
-            if (body.getLogin() != null && accountService.getUserByLogin(body.getLogin()) != null)
+            accountService.changeUser(user, body.getLogin(), body.getMail(),
+                    passwordEncoder.encode(password));
+            return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
+        } catch (AccountServiceDDException e) {
+            if (accountService.getUserByLogin(login) != null)
                 return new ResponseEntity<>(new ErrorResponse("Login already exist"), HttpStatus.CONFLICT);
-            if (body.getMail() != null && accountService.verifyMail(body.getMail()))
-                return new ResponseEntity<>(new ErrorResponse("Mail already exist"), HttpStatus.CONFLICT);
-        } catch (DataAccessException e) {
-            return new ResponseEntity<>(new ErrorResponse("Connection error"), HttpStatus.EXPECTATION_FAILED);
+            if (accountService.verifyMail(body.getMail()))
+                return new ResponseEntity<>(new ErrorResponse("E-mail already exist"), HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(new ErrorResponse("Server error"), HttpStatus.EXPECTATION_FAILED);
     }
 
     @PostMapping("api/setscore")
-    public ResponseEntity<Response> setScore(@RequestBody GetScoreBody body, HttpSession httpSession) {
+    public ResponseEntity<Response> setScore(@RequestBody GetScoreBody body, HttpSession httpSession)
+            throws AccountServiceDBException {
         final String login = (String) httpSession.getAttribute("Login");
         if (login == null)
             return new ResponseEntity<>(new ErrorResponse("Empty user"), HttpStatus.NOT_FOUND);
-        try {
-            final UserProfile currentUser = accountService.getUserByLogin(login);
-            if (currentUser == null)
-                return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.NOT_FOUND);
-            final Integer score = body.getScore();
-            if (score == null)
-                return new ResponseEntity<>(new ErrorResponse("Empty score"), HttpStatus.NOT_FOUND);
-            accountService.changeScore(currentUser, body.getScore());
-            return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
-        } catch (DataAccessException e) {
-            return new ResponseEntity<>(new ErrorResponse("Connection error"), HttpStatus.EXPECTATION_FAILED);
-        }
+        final UserProfile currentUser = accountService.getUserByLogin(login);
+        if (currentUser == null)
+            return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.NOT_FOUND);
+        final Integer score = body.getScore();
+        if (score == null)
+            return new ResponseEntity<>(new ErrorResponse("Empty score"), HttpStatus.NOT_FOUND);
+        accountService.changeScore(currentUser, body.getScore());
+        return new ResponseEntity<>(new OkResponse(), HttpStatus.OK);
+
     }
 
     @GetMapping("api/getscore")
-    public ResponseEntity<Response> getScore(HttpSession httpSession) {
+    public ResponseEntity<Response> getScore(HttpSession httpSession)
+            throws AccountServiceDBException {
         final String login = (String) httpSession.getAttribute("Login");
         if (login == null)
             return new ResponseEntity<>(new ErrorResponse("Empty user"), HttpStatus.NOT_FOUND);
-        try {
-            final UserProfile currentUser = accountService.getUserByLogin(login);
-            if (currentUser == null)
-                return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.NOT_FOUND);
-            final int score = accountService.getScore(login);
-            return new ResponseEntity<>(new ScoreResponse(score), HttpStatus.OK);
-        } catch (DataAccessException e) {
-            return new ResponseEntity<>(new ErrorResponse("Connection error"), HttpStatus.EXPECTATION_FAILED);
-        }
+        final UserProfile currentUser = accountService.getUserByLogin(login);
+        if (currentUser == null)
+            return new ResponseEntity<>(new ErrorResponse("User not found"), HttpStatus.NOT_FOUND);
+        final int score = accountService.getScore(login);
+        return new ResponseEntity<>(new ScoreResponse(score), HttpStatus.OK);
     }
 
     @GetMapping("api/users")
-    public ResponseEntity<Response> getUsers(HttpSession httpSession) {
-        try {
-            final ArrayList<UserToInfo> users = accountService.getAllUsers();
-            return new ResponseEntity<>(new UsersListResponse(users), HttpStatus.OK);
-        }
-        catch (DataAccessException e){
-            return new ResponseEntity<>(new ErrorResponse("Connection error"), HttpStatus.EXPECTATION_FAILED);
-        }
+    public ResponseEntity<Response> getUsers(HttpSession httpSession) throws AccountServiceDBException {
+        final ArrayList<UserToInfo> users = accountService.getAllUsers();
+        return new ResponseEntity<>(new UsersListResponse(users), HttpStatus.OK);
     }
 
-    public UserController(@NotNull AccountService accountService, @NotNull PasswordEncoder passwordEncoder) {
+
+    public UserController(@NotNull AccountServiceImpl accountService, @NotNull PasswordEncoder passwordEncoder) {
         this.accountService = accountService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -206,6 +200,4 @@ public class UserController {
             return score;
         }
     }
-
-
 }

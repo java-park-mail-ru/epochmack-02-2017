@@ -8,6 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import techpark.Application;
+import techpark.exceptions.AccountServiceDBException;
+import techpark.exceptions.AccountServiceDDException;
 import techpark.user.UserProfile;
 import techpark.user.UserToInfo;
 
@@ -26,11 +28,11 @@ public class AccountServiceTest {
 
     @SuppressWarnings("SpringJavaAutowiredMembersInspection")
     @Autowired
-    private AccountService accountService;
+    private AccountServiceImpl accountService;
 
 
     @Before
-    public void createTestUsers(){
+    public void createTestUsers() throws AccountServiceDBException, AccountServiceDDException {
         final UserProfile user = new UserProfile("mail1", "login1", "password1", null);
         final UserProfile user1 = new UserProfile("mail2", "login2", "password2", null);
         final UserProfile user2 = new UserProfile("mail3", "login3", "password3", null);
@@ -40,7 +42,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void testRegister(){
+    public void testRegister() throws AccountServiceDBException, AccountServiceDDException {
         final UserProfile user = new UserProfile("mail4", "login4", "password4", null);
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         final UserProfile userByLogin = accountService.getUserByLogin("login4");
@@ -50,14 +52,14 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void testVerifyLogin(){
+    public void testVerifyLogin() throws AccountServiceDBException, AccountServiceDDException {
         final UserProfile user = new UserProfile("mail4", "login4", "password4", null);
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         assertTrue(accountService.verifyMail(user.getMail()));
     }
 
     @Test
-    public void testGetUserByLogin(){
+    public void testGetUserByLogin() throws AccountServiceDBException, AccountServiceDDException {
         final UserProfile user = new UserProfile("mail5", "login5", "password5", null);
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         final UserProfile userByLogin = accountService.getUserByLogin("login5");
@@ -67,10 +69,10 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void testChangeUser(){
+    public void testChangeUser() throws AccountServiceDBException, AccountServiceDDException {
         final UserProfile user = new UserProfile("mail6", "login6", "password6", null);
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
-        assertTrue(accountService.changeUser(user, "newlogin", "newmail", "newpassword"));
+        accountService.changeUser(user, "newlogin", "newmail", "newpassword");
         final UserProfile changeUser = accountService.getUserByLogin("newlogin");
         assertNotNull(changeUser);
         assertEquals("newlogin", changeUser.getLogin());
@@ -80,10 +82,10 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void testChangeUserNotAll(){
+    public void testChangeUserNotAll() throws AccountServiceDBException, AccountServiceDDException {
         final UserProfile user = new UserProfile("mail7", "login7", "password7", null);
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
-        assertTrue(accountService.changeUser(user, "newlogin1", null, "newpassword1"));
+        accountService.changeUser(user, "newlogin1", null, "newpassword1");
         final UserProfile changeUser = accountService.getUserByLogin("newlogin1");
         assertNotNull(changeUser);
         assertEquals("newlogin1", changeUser.getLogin());
@@ -92,7 +94,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void testChangeScore(){
+    public void testChangeScore() throws AccountServiceDBException {
         final UserProfile user = accountService.getUserByLogin("login1");
         assertNotNull(user);
         accountService.changeScore(user, 6);
@@ -100,7 +102,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void testChangeScoreToLowest(){
+    public void testChangeScoreToLowest() throws AccountServiceDBException {
         UserProfile user = accountService.getUserByLogin("login1");
         assertNotNull(user);
         accountService.changeScore(user, 6);
@@ -112,7 +114,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void testGetScore(){
+    public void testGetScore() throws AccountServiceDBException {
         final UserProfile user = accountService.getUserByLogin("login2");
         assertNotNull(user);
         accountService.changeScore(user, 10);
@@ -121,7 +123,7 @@ public class AccountServiceTest {
 
     @SuppressWarnings({"ConstantConditions", "MagicNumber"})
     @Test
-    public void testGetAllUsers(){
+    public void testGetAllUsers() throws AccountServiceDBException {
         UserProfile user1 = accountService.getUserByLogin("login1");
         UserProfile user2 = accountService.getUserByLogin("login2");
         UserProfile user3 = accountService.getUserByLogin("login3");
