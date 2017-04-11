@@ -1,5 +1,7 @@
 package techpark.user;
 
+import org.jetbrains.annotations.Nullable;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -13,24 +15,18 @@ public class UserProfile {
     private String password;
     private Integer hightScore;
 
-    public UserProfile(@NotNull String mail, @NotNull String login, @NotNull String password){
+    public UserProfile(@NotNull String mail, @NotNull String login, @NotNull String password,
+                       @Nullable Integer score){
         this.mail = mail;
         this.login = login;
         this.password = password;
-        this.hightScore = 0;
-    }
-
-    public void setScore(Integer score){
-        this.hightScore = score;
+        this.hightScore = score == null ? 0 :  score;
     }
 
     public String getMail(){
         return mail;
     }
 
-    public void setMail(String mail){
-        this.mail = mail;
-    }
 
     public String getLogin(){
         return login;
@@ -42,10 +38,6 @@ public class UserProfile {
 
     public String getPassword(){
         return password;
-    }
-
-    public void setPassword(String password){
-        this.password = password;
     }
 
     public Integer getScore(){

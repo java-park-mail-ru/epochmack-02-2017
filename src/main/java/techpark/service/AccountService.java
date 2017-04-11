@@ -1,79 +1,41 @@
 package techpark.service;
 
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+
+import techpark.exceptions.AccountServiceDBException;
+import techpark.exceptions.AccountServiceDDException;
 import techpark.user.UserProfile;
 import techpark.user.UserToInfo;
 
+
 /**
- * Created by Fedorova on 20/02/2017.
+ * Created by Варя on 10.04.2017.
  */
-@Service
-public class AccountService {
+public interface AccountService {
 
-    private Map<String, UserProfile> userNameToUserProfile = new HashMap<>();
 
-    @NotNull
-    public UserProfile register(@NotNull  String mail, @NotNull  String login, @NotNull  String password) {
+    void register(@NotNull String mail, @NotNull String login, @NotNull String password)
+            throws AccountServiceDBException, AccountServiceDDException;
 
-        final UserProfile currentUser = new UserProfile(mail, login, password);
-        userNameToUserProfile.put(login, currentUser);
-
-        return currentUser;
-    }
-
-    public boolean verifylogin(@NotNull String login) {
-        return ( userNameToUserProfile.containsKey(login));
-    }
-
-    public UserProfile getUserByLogin(@NotNull String login){
-        return userNameToUserProfile.get(login);
-    }
+    boolean verifyMail(@NotNull String mail)
+            throws AccountServiceDBException;
 
     @Nullable
-    public UserProfile getUserByMail(@NotNull String mail){
-        for(UserProfile user: userNameToUserProfile.values()){
-           if (mail.equals(user.getMail()))
-               return user;
-        }
-        return null;
-    }
+    UserProfile getUserByLogin(@NotNull String login)
+            throws AccountServiceDBException;
 
-    public void changeUser (@NotNull UserProfile currentUser, @NotNull String type, @NotNull String value){
-        switch (type){
-            case "login":
-                userNameToUserProfile.remove(currentUser.getLogin(),currentUser);
-                currentUser.setLogin(value);
-                userNameToUserProfile.put(currentUser.getLogin(), currentUser);
-                break;
-            case "mail":
-                currentUser.setMail(value);
-                break;
-            case "password":
-                currentUser.setPassword(value);
-                break;
-            default: break;
-        }
-    }
+    void changeUser(@NotNull UserProfile user, @Nullable String login, @Nullable String mail,
+                           @Nullable String password) throws AccountServiceDBException, AccountServiceDDException;
 
-    public void changeScore (@NotNull UserProfile currentUser, @NotNull Integer score){
-        if(currentUser.getScore() < score)
-            currentUser.setScore(score);
-    }
+    void changeScore(@NotNull UserProfile currentUser, @NotNull Integer score)
+            throws AccountServiceDBException;
 
-    public LinkedList<UserToInfo> getAllUsers() {
-        LinkedList<UserProfile> profiles = new LinkedList<>(userNameToUserProfile.values());
-        LinkedList<UserToInfo> users = new LinkedList<UserToInfo>();
-        for (UserProfile profile : profiles) {
-            users.add(new UserToInfo(profile));
-        }
-        return users;
-    }
+    int getScore(@NotNull String login) throws AccountServiceDBException;
+
+    @NotNull
+    ArrayList<UserToInfo> getAllUsers() throws AccountServiceDBException;
 
 }

@@ -1,7 +1,4 @@
-package techpark.jsonResponse;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+package techpark.jsonresponse;
 
 /**
  * Created by Fedorova on 05.03.2017.
