@@ -44,4 +44,20 @@ public class UserProfile {
         return hightScore;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final UserProfile userProfile = (UserProfile) o;
+        if (!login.equals(userProfile.login)) return false;
+        if (!mail.equals(userProfile.mail)) return false;
+        return password.equals(userProfile.password);
+    }
+
+    @Override
+    public int hashCode() {
+        final int result = login.hashCode() + mail.hashCode() + password.hashCode();
+        return result ^ (result >>> 31);
+    }
+
 }
