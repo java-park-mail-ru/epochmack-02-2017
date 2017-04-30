@@ -24,9 +24,7 @@ public class EventHandlerContainer {
 
         final Class clazz;
         try {
-            System.out.println(message.getType());
             clazz = Class.forName(message.getType());
-            System.out.println(clazz.getName());
         } catch (ClassNotFoundException e) {
             throw new HandleException("Can't handle message of " + message.getType() + " type", e);
         }

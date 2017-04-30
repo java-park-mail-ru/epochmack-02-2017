@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import techpark.game.Config;
 import techpark.game.GameSession;
-import techpark.game.avatar.Field;
+import techpark.game.avatar.AOE;
+import techpark.game.avatar.GameUser;
 import techpark.game.avatar.ThroneDamage;
-import techpark.game.base.ServerSnap;
-import techpark.game.base.ServerSnapPart2;
-import techpark.user.UserProfile;
+import techpark.game.base.ServerMazeSnap;
+import techpark.game.base.ServerWaveSnap;
 import techpark.websocket.EventMessage;
 import techpark.websocket.RemotePointService;
 
@@ -19,6 +19,7 @@ import java.util.List;
 /**
  * Created by Варя on 22.04.2017.
  */
+@SuppressWarnings("OverlyBroadCatchBlock")
 @Service
 public class ServerSnapshotService {
     private final RemotePointService remotePointService;
@@ -29,49 +30,52 @@ public class ServerSnapshotService {
     }
 
     @SuppressWarnings("OverlyBroadCatchBlock")
-    public void sendSnapshotsFor(GameSession session, int round){
-        final Object snap;
-        final String className;
-        final List<UserProfile> players= session.getPlayers();
-        if(round == 1) {
-            snap = processFirstPart(session);
-            className = ServerSnap.class.getName();
+    public void sendSnapshotsFor(GameSession session){
+        processFirstPart(session);
+        boolean ready = true;
+        for (GameUser gamer: session.getUsers())
+            ready &= gamer.isReady();
+        if (ready) {
+            session.incrementWave();
+            processSecondtPart(session);
         }
-        else{
-            snap = processSecondtPart(session);
-            className = ServerSnapPart2.class.getName();
-        }
+    }
+
+    private void processFirstPart(GameSession session){
+        final ServerMazeSnap serverSnap = new ServerMazeSnap();
+        serverSnap.setMap(session.field.getMap());
         try {
-            final EventMessage message = new EventMessage(className, objectMapper.writeValueAsString(snap));
-            for (UserProfile player : players) {
-                remotePointService.sendMessageToUser(player, message);
+            final EventMessage message = new EventMessage(ServerMazeSnap.class, objectMapper.writeValueAsString(serverSnap));
+            for (GameUser player : session.getUsers()) {
+                if(player.getAvaliableGems().size() == 6)
+                    serverSnap.setCombinatios(player.calculateCombinations(session.field.getAvaliableGems()));
+                remotePointService.sendMessageToUser(player.getUser(), message);
             }
         } catch (IOException ex) {
             throw new RuntimeException("Failed sending snapshot", ex);
         }
-
     }
 
-    private ServerSnap processFirstPart(GameSession session){
-        final ServerSnap serverSnap = new ServerSnap();
-        serverSnap.setMap(session.field.getMap());
-        if(session.getGems().size() == 6)
-            serverSnap.setCombinatios(session.field.calculateCombinations());
-        return serverSnap;
-    }
-
-    private ServerSnapPart2 processSecondtPart(GameSession session){
-        final ServerSnapPart2 serverSnap = new ServerSnapPart2();
+    private void processSecondtPart(GameSession session){
+        final ServerWaveSnap serverSnap = new ServerWaveSnap();
         serverSnap.setRoute(session.field.calculateRoute());
-        final Field.AOE aoe = session.field.new AOE(session.getWave(), serverSnap.getRoute());
+        final AOE aoe = new AOE(session.getWave(), serverSnap.getRoute(), session.field.getAvaliableGems());
         serverSnap.setEnemyDamages(aoe.calulateEnemyDamage());
         final List<ThroneDamage> throneDamages = aoe.calulateThroneDamage();
         serverSnap.setThroneDamages(throneDamages);
         session.setPoints(Config.NUMBERENEMY - aoe.getEnemies().size());
         serverSnap.setPoints(session.getPoints());
+        serverSnap.setWave(session.getWave());
         if(throneDamages.get(throneDamages.size() - 1).getHp() <= 0.0)
             session.setGameOver();
-        return serverSnap;
+        try {
+            final EventMessage message = new EventMessage(ServerWaveSnap.class, objectMapper.writeValueAsString(serverSnap));
+            for (GameUser player : session.getUsers())
+                remotePointService.sendMessageToUser(player.getUser(), message);
+        }
+        catch (IOException ex) {
+            throw new RuntimeException("Failed sending snapshot", ex);
+        }
     }
 
 }

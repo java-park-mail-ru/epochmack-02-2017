@@ -10,7 +10,7 @@ import java.util.List;
  * Created by Варя on 22.04.2017.
  */
 @SuppressWarnings("unused")
-public class ServerSnapPart2 {
+public class ServerWaveSnap {
     private int wave;
     private List<Square> route;
     private List<EnemyDamage> enemyDamages;

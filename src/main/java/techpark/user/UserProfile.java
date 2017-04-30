@@ -15,6 +15,10 @@ public class UserProfile {
     private String password;
     private Integer hightScore;
 
+    public UserProfile(@NotNull String mail, @NotNull String login, @NotNull String password){
+        this(mail, login, password, null);
+    }
+
     public UserProfile(@NotNull String mail, @NotNull String login, @NotNull String password,
                        @Nullable Integer score){
         this.mail = mail;
@@ -56,8 +60,17 @@ public class UserProfile {
 
     @Override
     public int hashCode() {
-        final int result = login.hashCode() + mail.hashCode() + password.hashCode();
-        return result ^ (result >>> 31);
+        int result = mail != null ? mail.hashCode() : 0;
+        result = 31 * result + (login != null ? login.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (hightScore != null ? hightScore.hashCode() : 0);
+        return result;
     }
+
+//    @Override
+//    public int hashCode() {
+//        final int result = login.hashCode() + mail.hashCode() + password.hashCode();
+//        return result ^ (result >>> 31);
+//    }
 
 }

@@ -33,9 +33,9 @@ public class AccountServiceTest {
 
     @Before
     public void createTestUsers() throws AccountServiceDBException, AccountServiceDDException {
-        final UserProfile user = new UserProfile("mail1", "login1", "password1", null);
-        final UserProfile user1 = new UserProfile("mail2", "login2", "password2", null);
-        final UserProfile user2 = new UserProfile("mail3", "login3", "password3", null);
+        final UserProfile user = new UserProfile("mail1", "login1", "password1");
+        final UserProfile user1 = new UserProfile("mail2", "login2", "password2");
+        final UserProfile user2 = new UserProfile("mail3", "login3", "password3");
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         accountService.register(user1.getMail(), user1.getLogin(), user1.getPassword());
         accountService.register(user2.getMail(), user2.getLogin(), user2.getPassword());
@@ -43,7 +43,7 @@ public class AccountServiceTest {
 
     @Test
     public void testRegister() throws AccountServiceDBException, AccountServiceDDException {
-        final UserProfile user = new UserProfile("mail4", "login4", "password4", null);
+        final UserProfile user = new UserProfile("mail4", "login4", "password4");
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         final UserProfile userByLogin = accountService.getUserByLogin("login4");
         assertNotNull(userByLogin);
@@ -53,14 +53,14 @@ public class AccountServiceTest {
 
     @Test
     public void testVerifyLogin() throws AccountServiceDBException, AccountServiceDDException {
-        final UserProfile user = new UserProfile("mail4", "login4", "password4", null);
+        final UserProfile user = new UserProfile("mail4", "login4", "password4");
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         assertTrue(accountService.verifyMail(user.getMail()));
     }
 
     @Test
     public void testGetUserByLogin() throws AccountServiceDBException, AccountServiceDDException {
-        final UserProfile user = new UserProfile("mail5", "login5", "password5", null);
+        final UserProfile user = new UserProfile("mail5", "login5", "password5");
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         final UserProfile userByLogin = accountService.getUserByLogin("login5");
         assertNotNull(userByLogin);
@@ -70,7 +70,7 @@ public class AccountServiceTest {
 
     @Test
     public void testChangeUser() throws AccountServiceDBException, AccountServiceDDException {
-        final UserProfile user = new UserProfile("mail6", "login6", "password6", null);
+        final UserProfile user = new UserProfile("mail6", "login6", "password6");
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         accountService.changeUser(user, "newlogin", "newmail", "newpassword");
         final UserProfile changeUser = accountService.getUserByLogin("newlogin");
@@ -83,7 +83,7 @@ public class AccountServiceTest {
 
     @Test
     public void testChangeUserNotAll() throws AccountServiceDBException, AccountServiceDDException {
-        final UserProfile user = new UserProfile("mail7", "login7", "password7", null);
+        final UserProfile user = new UserProfile("mail7", "login7", "password7");
         accountService.register(user.getMail(), user.getLogin(), user.getPassword());
         accountService.changeUser(user, "newlogin1", null, "newpassword1");
         final UserProfile changeUser = accountService.getUserByLogin("newlogin1");

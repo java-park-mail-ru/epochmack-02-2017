@@ -8,11 +8,13 @@ public class Enemy {
     private int number;
     private double hp;
     private double speed;
+    private boolean dead;
 
     public Enemy(double hp, int number, double speed){
         this.hp = hp;
         this.number = number;
         this.speed = speed;
+        this.dead = false;
     }
 
     public void setNumber(int number) {
@@ -37,6 +39,14 @@ public class Enemy {
 
     public double getSpeed() {
         return speed;
+    }
+
+    public void setDead() {
+        this.dead = true;
+    }
+
+    public boolean isDead() {
+        return dead;
     }
 
     @Override

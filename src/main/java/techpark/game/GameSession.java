@@ -1,7 +1,7 @@
 package techpark.game;
 
 import techpark.game.avatar.Field;
-import techpark.game.avatar.Square;
+import techpark.game.avatar.GameUser;
 import techpark.user.UserProfile;
 
 import java.util.ArrayList;
@@ -12,36 +12,25 @@ import java.util.List;
  */
 @SuppressWarnings("PublicField")
 public class GameSession {
-    private List<UserProfile> players;
+    private List<GameUser> users;
     private int wave;
-    private List<Square> gemsToStones;
     private int points;
     private boolean gameOver;
     public final Field field;
 
     public GameSession(List<UserProfile> players) {
-        this.players = players;
+        users = new ArrayList<>();
+        for(UserProfile user: players){
+            users.add(new GameUser(user));
+        }
         this.wave = 0;
         this.points = 0;
-        this.gemsToStones = new ArrayList<>();
         this.field = new Field();
         this.gameOver = false;
     }
 
-    public List<UserProfile> getPlayers() {
-        return players;
-    }
-
-    public void setGem(Square square){
-        gemsToStones.add(square);
-    }
-
-    public void removeGem(Square square){
-        gemsToStones.remove(square);
-    }
-
-    public void clearGems(){
-        gemsToStones.clear();
+    public List<GameUser> getUsers() {
+        return users;
     }
 
     public void incrementWave(){this.wave++;}
@@ -52,10 +41,6 @@ public class GameSession {
 
     public int getPoints() {
         return points;
-    }
-
-    public List<Square> getGems() {
-        return gemsToStones;
     }
 
     public int getWave() {
@@ -69,4 +54,13 @@ public class GameSession {
     public void setGameOver() {
         this.gameOver = true;
     }
+
+    public GameUser getSelf(UserProfile user){
+        for (GameUser gamer: users){
+            if(gamer.getUser().equals(user))
+                return gamer;
+        }
+        throw new IllegalArgumentException("Request self for game but user not participate it");
+    }
+
 }

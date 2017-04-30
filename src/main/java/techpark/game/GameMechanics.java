@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
 import techpark.exceptions.AccountServiceDBException;
+import techpark.game.avatar.GameUser;
 import techpark.game.base.ClientSnap;
 import techpark.game.internal.ClientSnapshotsService;
 import techpark.game.internal.ServerSnapshotService;
@@ -50,17 +51,19 @@ public class GameMechanics {
     }
 
     public void addPlayer(UserProfile user){
-        if(!waiters.contains(user) && !sessions.containsKey(user)){
-            waiters.add(user);
-            searchGame();
-        }
+        executor.submit(()->{
+            if(!waiters.contains(user) && !sessions.containsKey(user)){
+                waiters.add(user);
+                searchGame();
+            }
+        });
     }
 
     public void addClientSnapshot(UserProfile userProfile, ClientSnap snap) {
         executor.submit(() -> processAction(userProfile, snap));
     }
 
-    public void searchGame(){
+    private void searchGame(){
         waiters.removeIf(userProfile -> !remotePointService.isConnected(userProfile));
         while (waiters.size() >= Config.numberOfPlayers){
             final List<UserProfile> players = new ArrayList<>();
@@ -69,35 +72,36 @@ public class GameMechanics {
             final GameSession session = new GameSession(players);
             try {
                 startGameforSession(session);
-                for(UserProfile player: session.getPlayers())
-                    sessions.put(player, session);
+                for(GameUser player: session.getUsers())
+                    sessions.put(player.getUser(), session);
             } catch (IOException e) {
                 logger.error("failed to send initial message", e);
-                for(UserProfile player: session.getPlayers())
-                    remotePointService.closeConnection(player, CloseStatus.SERVER_ERROR);
+                for(GameUser player: session.getUsers())
+                    remotePointService.closeConnection(player.getUser(), CloseStatus.SERVER_ERROR);
             }
 
         }
     }
 
     @SuppressWarnings("OverlyBroadThrowsClause")
-    public void startGameforSession(GameSession session) throws IOException {
+    private void startGameforSession(GameSession session) throws IOException {
         final InitGame.Request initMessage = new InitGame.Request();
         final List<String> players = new ArrayList<>();
-        for (UserProfile player : session.getPlayers())
-            players.add(player.getLogin());
+        for (GameUser player: session.getUsers()){
+            players.add(player.getUser().getLogin());
+        }
         initMessage.setPlayers(players);
         final ObjectMapper objectMapper = new ObjectMapper();
         final EventMessage message = new EventMessage(InitGame.Request.class.getName(),
                 objectMapper.writeValueAsString(initMessage));
-        for (UserProfile player : session.getPlayers())
-            remotePointService.sendMessageToUser(player, message);
+        for (GameUser player: session.getUsers())
+            remotePointService.sendMessageToUser(player.getUser(), message);
     }
 
-    public void processAction(UserProfile userProfile, ClientSnap snap){
-        final GameSession gameSession = sessions.get(userProfile);
-        clientSnapshotsService.processSnapshotsFor(gameSession,  snap);
-        serverSnapshotService.sendSnapshotsFor(gameSession, snap.isStartWave()? 1 : 2);
+    private void processAction(UserProfile userProfile, ClientSnap snap){
+        final GameSession gameSession = getSessionFor(userProfile);
+        clientSnapshotsService.processSnapshotsFor(gameSession, snap, gameSession.getSelf(userProfile));
+        serverSnapshotService.sendSnapshotsFor(gameSession);
         if(gameSession.isGameOver())
             endGame(userProfile, gameSession);
     }
@@ -110,6 +114,10 @@ public class GameMechanics {
         } catch (AccountServiceDBException e) {
             e.printStackTrace();
         }
+    }
+
+    public GameSession getSessionFor(UserProfile userProfile){
+        return sessions.get(userProfile);
     }
 
 }

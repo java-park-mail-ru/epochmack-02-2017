@@ -6,6 +6,7 @@ import java.util.List;
  * Created by Варя on 18.04.2017.
  */
 public class InitGame {
+
     @SuppressWarnings("unused")
     public static final class Request {
         private List<String> players;

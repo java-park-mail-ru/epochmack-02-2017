@@ -89,6 +89,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.github.xaguzman/pathfinding -->
+        <dependency>
+            <groupId>com.github.xaguzman</groupId>
+            <artifactId>pathfinding</artifactId>
+            <version>0.2.6</version>
+        </dependency>
+
     </dependencies>
 
     <build>

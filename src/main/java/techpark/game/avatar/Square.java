@@ -1,24 +1,41 @@
 package techpark.game.avatar;
 
-import techpark.game.pathfinding.AbstractNode;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.xguzm.pathfinding.grid.GridCell;
+
 
 /**
  * Created by Варя on 22.04.2017.
  */
-public class Square extends AbstractNode {
+public class Square extends GridCell {
 
-    public Square(int x, int y){
+    private boolean diagonal;
+
+    public void setDiagonal() {
+        this.diagonal = true;
+    }
+
+    public boolean isDiagonal() {
+        return diagonal;
+    }
+
+    public Square(@JsonProperty("x") int x, @JsonProperty("y") int y){
         super(x, y);
+        diagonal = false;
     }
 
     @Override
-    public void sethCosts(AbstractNode endNode) {
-        this.sethCosts((absolute(this.getxPosition() - endNode.getxPosition())
-                + absolute(this.getyPosition() - endNode.getyPosition()))
-                * BASICMOVEMENTCOST);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Square square = (Square) o;
+        return this.getX() == square.getX() && this.getY() == square.getY();
     }
 
-    private int absolute(int a) {
-        return a > 0 ? a : -a;
+    @Override
+    public int hashCode() {
+        int result = this.getX();
+        result = 31 * result + this.getY();
+        return result;
     }
 }
