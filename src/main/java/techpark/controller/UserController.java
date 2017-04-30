@@ -24,7 +24,7 @@ import java.util.ArrayList;
  */
 
 @RestController
-//@CrossOrigin(origins = {"http://localhost:3000", "https://gem-td.herokuapp.com", "http://gem-td.herokuapp.com"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://gem-td.herokuapp.com", "http://gem-td.herokuapp.com", "*"})
 @SuppressWarnings("unused")
 public class UserController {
 
