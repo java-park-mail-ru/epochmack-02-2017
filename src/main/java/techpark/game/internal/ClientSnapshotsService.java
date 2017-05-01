@@ -1,13 +1,14 @@
 package techpark.game.internal;
 
 import org.springframework.stereotype.Service;
-import techpark.game.Config;
 import techpark.game.GameSession;
 import techpark.game.avatar.GameUser;
 import techpark.game.avatar.Square;
 import techpark.game.base.ClientSnap;
+import techpark.resources.Generator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -18,7 +19,8 @@ import java.util.Map;
 public class ClientSnapshotsService {
 
     public void processSnapshotsFor(GameSession session, ClientSnap snap, GameUser gamer){
-        if(gamer.getAvaliableGems().size() != 6){
+        final Generator generator = new Generator();
+        if(gamer.getAvaliableGems().size() != (int) generator.settings("gemsPerRound")){
             processFirstPart(session, snap, gamer);
         }
         else {
@@ -56,11 +58,14 @@ public class ClientSnapshotsService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void computeCombination(GameSession session, ClientSnap snap, Map<Square, Character> gamerGems) {
         final Map<Square, Character> allGems = new HashMap<>();
         allGems.putAll(session.field.getAvaliableGems());
         allGems.putAll(gamerGems);
-        for(Character gem: Config.COMBGEM.get(snap.getComb())) {
+        final Generator generator = new Generator();
+        final HashMap<Character, List<Character>> comb = generator.combinations();
+        for(Character gem: comb.get(snap.getComb())) {
             for (Map.Entry<Square, Character> agem : allGems.entrySet()) {
                 if (!gem.equals(session.field.getSquare(snap.getSquare())) &&
                         agem.getValue().equals(gem)) {

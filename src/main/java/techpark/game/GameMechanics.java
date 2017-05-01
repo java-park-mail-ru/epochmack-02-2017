@@ -12,6 +12,7 @@ import techpark.game.base.ClientSnap;
 import techpark.game.internal.ClientSnapshotsService;
 import techpark.game.internal.ServerSnapshotService;
 import techpark.game.request.InitGame;
+import techpark.resources.Generator;
 import techpark.service.AccountService;
 import techpark.user.UserProfile;
 import techpark.websocket.EventMessage;
@@ -64,10 +65,12 @@ public class GameMechanics {
     }
 
     private void searchGame(){
+        final Generator generator = new Generator();
+        final int numberOfPlayers = (int)generator.settings("numberOfPlayers");
         waiters.removeIf(userProfile -> !remotePointService.isConnected(userProfile));
-        while (waiters.size() >= Config.numberOfPlayers){
+        while (waiters.size() >= numberOfPlayers){
             final List<UserProfile> players = new ArrayList<>();
-            for(int i = 0 ; i < Config.numberOfPlayers; i++)
+            for(int i = 0 ; i < numberOfPlayers; i++)
                 players.add(waiters.poll());
             final GameSession session = new GameSession(players);
             try {

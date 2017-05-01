@@ -1,0 +1,7 @@
+{
+  "type": "techpark.game.avatar.Tower",
+  "alias": "m",
+  "frequency": 0.25,
+  "damage": 2.0,
+  "radius": 2.0
+}

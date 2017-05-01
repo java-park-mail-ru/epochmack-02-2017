@@ -1,0 +1,5 @@
+{
+  "type": "techpark.game.avatar.Enemy",
+  "hp": 2.0,
+  "speed": 0.5
+}

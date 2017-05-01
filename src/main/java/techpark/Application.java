@@ -8,6 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
+import techpark.resources.Generator;
 import techpark.websocket.GameSocketHandler;
 
 @SpringBootApplication
@@ -26,6 +27,11 @@ public class Application {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public Generator towerGenerator(){
+        return new Generator();
     }
 }
 

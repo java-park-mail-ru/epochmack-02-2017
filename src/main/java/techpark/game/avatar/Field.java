@@ -4,7 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import org.xguzm.pathfinding.grid.NavigationGrid;
 import org.xguzm.pathfinding.grid.finders.AStarGridFinder;
 import org.xguzm.pathfinding.grid.finders.GridFinderOptions;
-import techpark.game.Config;
+import techpark.resources.Generator;
+
 import java.util.*;
 
 
@@ -15,16 +16,21 @@ import java.util.*;
 public class Field {
     private char[][] map;
     private HashMap<Square, Character> avaliableGems;
+    private final int width;
+    private final int height;
 
     private void initMap(){
-        this.map = new char[Config.WIDTH][Config.HEIGHT];
-        for (int i =  0; i < Config.WIDTH; i++)
-            for(int j = 0; j < Config.HEIGHT; j++)
+        this.map = new char[width][height];
+        for (int i =  0; i < width; i++)
+            for(int j = 0; j < height; j++)
                 map[i][j] = 'o';
     }
 
     public Field(){
         this.avaliableGems = new HashMap<>();
+        final Generator generator = new Generator();
+        this.width = (int)generator.settings("width");
+        this.height = (int)generator.settings("height");
         initMap();
     }
 
@@ -73,10 +79,12 @@ public class Field {
     private List<Square> getSquares(NavigationGrid<Square> navGrid) {
         final AStarGridFinder<Square> finder = new AStarGridFinder(Square.class);
         final List<Square> route = new ArrayList<>();
-        for (int i = 0; i < Config.CONTROLPOINTS.size()-1; i++){
-            final List<Square> interval = finder.findPath(Config.CONTROLPOINTS.get(i).getX(),
-                    Config.CONTROLPOINTS.get(i).getY(),
-                    Config.CONTROLPOINTS.get(i+1).getX(), Config.CONTROLPOINTS.get(i+1).getY(), navGrid);
+        final Generator generator = new Generator();
+        final List<Square> points = generator.controlPoints();
+        for (int i = 0; i < points.size()-1; i++){
+            final List<Square> interval = finder.findPath(points.get(i).getX(),
+                    points.get(i).getY(),
+                    points.get(i+1).getX(), points.get(i+1).getY(), navGrid);
             if(interval == null) {
                 return new ArrayList<>();
             }
@@ -95,9 +103,9 @@ public class Field {
 
     @SuppressWarnings({"deprecation", "unchecked"})
     private NavigationGrid<Square> setWallkables() {
-        final Square[][] cells = new Square[Config.WIDTH][Config.HEIGHT];
-        for(int i = 0; i < Config.WIDTH; i++) {
-            for (int j = 0; j < Config.HEIGHT; j++) {
+        final Square[][] cells = new Square[width][height];
+        for(int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
                 cells[i][j] = new Square(i, j);
                 if (this.map[i][j] != 'o') {
                     cells[i][j].setWalkable(false);
@@ -111,8 +119,8 @@ public class Field {
     @Override
     public String toString(){
         final StringBuilder stringBuilder = new StringBuilder();
-        for(int i = 0; i < Config.WIDTH; i++) {
-            for (int j = 0; j < Config.HEIGHT; j++) {
+        for(int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
                 stringBuilder.append(map[i][j]);
             }
             stringBuilder.append('\n');

@@ -1,14 +1,29 @@
 package techpark.game.avatar;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import techpark.resources.Generator;
+import techpark.resources.Resource;
+
 /**
  * Created by Варя on 22.04.2017.
  */
 @SuppressWarnings("unused")
-public class Enemy {
+public class Enemy extends Resource{
     private int number;
     private double hp;
     private double speed;
-    private boolean dead;
+    private boolean dead  ;
+
+    @JsonCreator
+    public Enemy(@JsonProperty("type") String type,
+                 @JsonProperty("hp") double hp,
+                 @JsonProperty("speed") double speed){
+        super(type);
+        this.hp = hp;
+        this.speed = speed;
+        this.dead = false;
+    }
 
     public Enemy(double hp, int number, double speed){
         this.hp = hp;
@@ -23,6 +38,12 @@ public class Enemy {
 
     public void setHp(double hp) {
         this.hp = hp;
+    }
+
+    public void waveCoff(int wave){
+        final Generator generator = new Generator();
+        final double coff = (double)generator.settings("waveCoff") * wave;
+        this.hp *= coff;
     }
 
     public void incrementHp(double h) {

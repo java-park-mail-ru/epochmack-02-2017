@@ -2,13 +2,13 @@ package techpark.game.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import techpark.game.Config;
 import techpark.game.GameSession;
 import techpark.game.avatar.AOE;
 import techpark.game.avatar.GameUser;
 import techpark.game.avatar.ThroneDamage;
 import techpark.game.base.ServerMazeSnap;
 import techpark.game.base.ServerWaveSnap;
+import techpark.resources.Generator;
 import techpark.websocket.EventMessage;
 import techpark.websocket.RemotePointService;
 
@@ -24,9 +24,11 @@ import java.util.List;
 public class ServerSnapshotService {
     private final RemotePointService remotePointService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Generator generator;
 
     public ServerSnapshotService(RemotePointService remotePointService) {
         this.remotePointService = remotePointService;
+        this.generator = new Generator();
     }
 
     @SuppressWarnings("OverlyBroadCatchBlock")
@@ -47,7 +49,7 @@ public class ServerSnapshotService {
         try {
             final EventMessage message = new EventMessage(ServerMazeSnap.class, objectMapper.writeValueAsString(serverSnap));
             for (GameUser player : session.getUsers()) {
-                if(player.getAvaliableGems().size() == 6)
+                if(player.getAvaliableGems().size() == (int)generator.settings("gemsPerRound"))
                     serverSnap.setCombinatios(player.calculateCombinations(session.field.getAvaliableGems()));
                 remotePointService.sendMessageToUser(player.getUser(), message);
             }
@@ -63,7 +65,7 @@ public class ServerSnapshotService {
         serverSnap.setEnemyDamages(aoe.calulateEnemyDamage());
         final List<ThroneDamage> throneDamages = aoe.calulateThroneDamage();
         serverSnap.setThroneDamages(throneDamages);
-        session.setPoints(Config.NUMBERENEMY - aoe.getEnemies().size());
+        session.setPoints((int)generator.settings("numberOfEnemies") - aoe.getEnemies().size());
         serverSnap.setPoints(session.getPoints());
         serverSnap.setWave(session.getWave());
         if(throneDamages.get(throneDamages.size() - 1).getHp() <= 0.0)

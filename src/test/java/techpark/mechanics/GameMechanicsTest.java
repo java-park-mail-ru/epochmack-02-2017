@@ -41,9 +41,6 @@ public class GameMechanicsTest {
     @SuppressWarnings("unused")
     @MockBean
     private RemotePointService remotePointService;
-    @SuppressWarnings("unused")
-    @MockBean
-    private WebSocketServerFactory defaultHandshakeHandler;
     @Autowired
     private GameMechanics gameMechanics;
     @Autowired
@@ -82,7 +79,7 @@ public class GameMechanicsTest {
         snap2.setSquare(new Square(5, 3));
         gameMechanics.addClientSnapshot(userProfile1.getUser(), snap1);
         gameMechanics.addClientSnapshot(userProfile2.getUser(), snap2);
-        Thread.sleep(20);
+        Thread.sleep(100);
         Assert.assertNotEquals(gameSession.field.getMap()[8][3], 'o');
         Assert.assertNotEquals(gameSession.field.getMap()[5][3], 'o');
     }
@@ -170,7 +167,7 @@ public class GameMechanicsTest {
         snap77.setStartWave(true);
         snap77.setSquare(new Square(3, 2));
         gameMechanics.addClientSnapshot(us2, snap77);
-        Thread.sleep(5000);
+        Thread.sleep(10000);
         Assert.assertEquals(gameSession.getPoints(), 10);
         Assert.assertEquals(gameSession.getWave(), 1);
         Assert.assertEquals(gameSession.field.getMap()[3][3], '#');
@@ -181,7 +178,7 @@ public class GameMechanicsTest {
         gameMechanics.addPlayer(user1);
         gameMechanics.addPlayer(user2);
         try {
-            Thread.sleep(500);
+            Thread.sleep(700);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

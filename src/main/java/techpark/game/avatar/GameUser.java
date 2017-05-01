@@ -1,6 +1,6 @@
 package techpark.game.avatar;
 
-import techpark.game.Config;
+import techpark.resources.Generator;
 import techpark.user.UserProfile;
 
 import java.util.*;
@@ -49,12 +49,15 @@ public class GameUser {
     }
 
 
+    @SuppressWarnings("unchecked")
     public HashMap<Square, List<Character>> calculateCombinations(HashMap<Square, Character> fieldGems){
         final Map<Square, Character> allGems =  new HashMap<>();
         allGems.putAll(fieldGems);
         allGems.putAll(avaliableGems);
+        final Generator generator = new Generator();
+        final HashMap<Character,List<Character>> comb = generator.combinations();
         final HashMap<Square, List<Character>> combinations = new HashMap<>();
-        for (Map.Entry<Character,List<Character>> entry: Config.COMBGEM.entrySet()){
+        for (Map.Entry<Character,List<Character>> entry: comb.entrySet()){
             if (allGems.values().containsAll(entry.getValue())){
                 addCombination(combinations, entry);
             }

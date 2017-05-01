@@ -1,6 +1,6 @@
 package techpark.game.avatar;
 
-import techpark.game.Config;
+import techpark.resources.Generator;
 
 import java.util.*;
 
@@ -13,14 +13,18 @@ import static java.lang.Math.abs;
 public class AOE {
     private Map<Square, ArrayList<Tower>> towersOnRoute;
     private LinkedList<Enemy> enemies;
+    private final Generator generator;
 
     public AOE(int wave, List<Square> route, Map<Square, Character> avaliableGems) {
         this.towersOnRoute = new LinkedHashMap<>();
         this.enemies = new LinkedList<>();
+        this.generator = new Generator();
         reorgonizeTowers(route, avaliableGems);
-        for (int i = 0; i < Config.NUMBERENEMY; i++) {
-            this.enemies.add(new Enemy(Config.ENEMYHP * Config.WAVECOFF * wave,
-                    i, Config.ENEMYSPEED * Config.WAVECOFF * wave));
+        for (int i = 0; i < (int) generator.settings("numberOfEnemies"); i++) {
+            final Enemy enemy = (Enemy) generator.enemy();
+            enemy.setNumber(i);
+            enemy.waveCoff(wave);
+            this.enemies.add(enemy);
         }
     }
 
@@ -33,7 +37,8 @@ public class AOE {
     private void searchTower(Square route, Map<Square, Character> gems) {
         final ArrayList<Tower> towersAvailable = new ArrayList<>();
         for (Map.Entry<Square, Character> gem: gems.entrySet()){
-            final Tower tower = new Tower(gem.getValue(), gem.getKey());
+            final Tower tower = (Tower) generator.tower(gem.getValue());
+            tower.setSquare(gem.getKey());
             if(abs(gem.getKey().getX() - route.getX()) <= tower.getRadius() &&
                     abs(gem.getKey().getY() - route.getY()) <= tower.getRadius()){
                 towersAvailable.add(tower);
@@ -82,8 +87,9 @@ public class AOE {
     public List<ThroneDamage> calulateThroneDamage() {
         final List<ThroneDamage> throneDamages = new ArrayList<>();
         Double throneHP = 100.0;
+        final double throneCoff = (double) generator.settings("waveCoff");
         for (Enemy enemy : enemies) {
-            throneHP -= enemy.getHp() * Config.THRONECOFF;
+            throneHP -= enemy.getHp() * throneCoff;
             throneDamages.add(new ThroneDamage(throneHP, enemy.getNumber()));
             if (throneHP <= 0.0)
                 break;

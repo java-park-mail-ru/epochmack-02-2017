@@ -1,22 +1,30 @@
 package techpark.game.avatar;
 
-import techpark.game.Config;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import techpark.resources.Resource;
 
 /**
  * Created by Варя on 23.04.2017.
  */
 @SuppressWarnings("unused")
-public class Tower {
+public class Tower extends Resource{
     private Double damage;
     private Double frequency;
     private Double radius;
     private Square square;
 
-    public Tower(Character type, Square square){
-        this.damage = Config.TOWERS.get(type).get("DAMAGE");
-        this.frequency = Config.TOWERS.get(type).get("FREQUENCY");
-        this.radius = Config.TOWERS.get(type).get("RADIUS");
-        this.square = square;
+    @JsonCreator
+    public Tower(
+                 @JsonProperty("type")String type,
+                 @JsonProperty("alias")String alias,
+                 @JsonProperty("frequency") double frequency,
+                 @JsonProperty("damage") double damage,
+                 @JsonProperty("radius") double radius){
+        super(type);
+        this.damage = damage;
+        this.frequency =frequency;
+        this.radius = radius;
     }
 
     public Double getDamage() {
@@ -33,6 +41,10 @@ public class Tower {
 
     public Square getSquare() {
         return square;
+    }
+
+    public void setSquare(Square square) {
+        this.square = square;
     }
 
     @Override
