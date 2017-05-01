@@ -64,7 +64,8 @@ public class GameMechanicsTest {
 
     @Test
     public void gameStartedTest ()  {
-        startGame();
+        final GameSession gameSession = startGame();
+        endGame(gameSession);
     }
 
     @Test
@@ -81,6 +82,7 @@ public class GameMechanicsTest {
         Thread.sleep(100);
         Assert.assertNotEquals(gameSession.field.getMap()[8][3], 'o');
         Assert.assertNotEquals(gameSession.field.getMap()[5][3], 'o');
+        endGame(gameSession);
     }
 
     @Test
@@ -92,6 +94,7 @@ public class GameMechanicsTest {
         gameMechanics.addClientSnapshot(user.getUser(), snap1);
         Thread.sleep(500);
         Assert.assertEquals(gameSession.field.getMap()[2][2], 'o');
+        endGame(gameSession);
     }
 
     @Test
@@ -112,6 +115,7 @@ public class GameMechanicsTest {
         gameMechanics.addClientSnapshot(user.getUser(), snap4);
         Thread.sleep(700);
         Assert.assertEquals(gameSession.field.getMap()[6][5], 'o');
+        endGame(gameSession);
     }
 
 
@@ -148,12 +152,12 @@ public class GameMechanicsTest {
         snap77.setStartWave(true);
         snap77.setSquare(new Square(3, 2));
         gameMechanics.addClientSnapshot(us2, snap77);
-        Thread.sleep(15000);
-        System.out.println(gameSession.field.toString());
+        Thread.sleep(10000);
         Assert.assertEquals(gameSession.getPoints(), 10);
         Assert.assertEquals(gameSession.getWave(), 1);
         Assert.assertEquals(gameSession.field.getMap()[3][3], '#');
         Assert.assertEquals(gameSession.field.getMap()[1][3], '#');
+        endGame(gameSession);
     }
 
     private GameSession startGame()  {
@@ -171,5 +175,11 @@ public class GameMechanicsTest {
             users.add(gamer.getUser());
         Assert.assertEquals(users, Arrays.asList(user1, user2));
         return gameSession;
+    }
+
+    private void endGame(GameSession gameSession){
+        for(GameUser gamer: gameSession.getUsers()){
+            gameMechanics.endGame(gamer.getUser(), gameSession);
+        }
     }
 }
