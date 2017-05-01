@@ -129,15 +129,6 @@ public class GameMechanicsTest {
         final ClientSnap snap3 = new ClientSnap();
         snap3.setSquare(new Square(1, 3));
         gameMechanics.addClientSnapshot(us1, snap3);
-        final ClientSnap snap4 = new ClientSnap();
-        snap4.setSquare(new Square(1, 4));
-        gameMechanics.addClientSnapshot(us1, snap4);
-        final ClientSnap snap5 = new ClientSnap();
-        snap5.setSquare(new Square(1, 5));
-        gameMechanics.addClientSnapshot(us1, snap5);
-        final ClientSnap snap6 = new ClientSnap();
-        snap6.setSquare(new Square(1, 6));
-        gameMechanics.addClientSnapshot(us1, snap6);
         final ClientSnap snap7 = new ClientSnap();
         snap7.setStartWave(true);
         snap7.setSquare(new Square(1, 2));
@@ -153,24 +144,16 @@ public class GameMechanicsTest {
         final ClientSnap snap33 = new ClientSnap();
         snap33.setSquare(new Square(3, 3));
         gameMechanics.addClientSnapshot(us2, snap33);
-        final ClientSnap snap44 = new ClientSnap();
-        snap44.setSquare(new Square(3, 4));
-        gameMechanics.addClientSnapshot(us2, snap44);
-        final ClientSnap snap55 = new ClientSnap();
-        snap55.setSquare(new Square(3, 5));
-        gameMechanics.addClientSnapshot(us2, snap55);
-        final ClientSnap snap66 = new ClientSnap();
-        snap66.setSquare(new Square(3, 6));
-        gameMechanics.addClientSnapshot(us2, snap66);
         final ClientSnap snap77 = new ClientSnap();
         snap77.setStartWave(true);
         snap77.setSquare(new Square(3, 2));
         gameMechanics.addClientSnapshot(us2, snap77);
-        Thread.sleep(20000);
+        Thread.sleep(15000);
+        System.out.println(gameSession.field.toString());
         Assert.assertEquals(gameSession.getPoints(), 10);
         Assert.assertEquals(gameSession.getWave(), 1);
         Assert.assertEquals(gameSession.field.getMap()[3][3], '#');
-        Assert.assertEquals(gameSession.field.getMap()[1][1], '#');
+        Assert.assertEquals(gameSession.field.getMap()[1][3], '#');
     }
 
     private GameSession startGame()  {
