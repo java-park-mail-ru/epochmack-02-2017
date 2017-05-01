@@ -9,7 +9,6 @@ import techpark.game.base.ClientSnap;
 import techpark.game.base.ServerMazeSnap;
 import techpark.game.base.ServerWaveSnap;
 import techpark.game.request.InitGame;
-import techpark.resources.Generator;
 
 import java.io.IOException;
 import java.util.Arrays;

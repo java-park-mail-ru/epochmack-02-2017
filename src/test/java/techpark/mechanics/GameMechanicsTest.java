@@ -1,6 +1,5 @@
 package techpark.mechanics;
 
-import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -167,7 +166,7 @@ public class GameMechanicsTest {
         snap77.setStartWave(true);
         snap77.setSquare(new Square(3, 2));
         gameMechanics.addClientSnapshot(us2, snap77);
-        Thread.sleep(10000);
+        Thread.sleep(20000);
         Assert.assertEquals(gameSession.getPoints(), 10);
         Assert.assertEquals(gameSession.getWave(), 1);
         Assert.assertEquals(gameSession.field.getMap()[3][3], '#');
