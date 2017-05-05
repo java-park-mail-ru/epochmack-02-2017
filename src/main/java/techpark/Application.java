@@ -29,9 +29,5 @@ public class Application {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public Generator towerGenerator(){
-        return new Generator();
-    }
 }
 

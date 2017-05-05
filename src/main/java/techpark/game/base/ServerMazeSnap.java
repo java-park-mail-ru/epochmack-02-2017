@@ -11,6 +11,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class ServerMazeSnap {
     private char[][] map;
+    private String user;
     private HashMap<Square, List<Character>> combinations;
 
     public void setMap(char[][] map) {
@@ -29,4 +30,11 @@ public class ServerMazeSnap {
         return map;
     }
 
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
 }

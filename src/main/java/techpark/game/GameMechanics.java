@@ -103,8 +103,9 @@ public class GameMechanics {
 
     private void processAction(UserProfile userProfile, ClientSnap snap){
         final GameSession gameSession = getSessionFor(userProfile);
-        clientSnapshotsService.processSnapshotsFor(gameSession, snap, gameSession.getSelf(userProfile));
-        serverSnapshotService.sendSnapshotsFor(gameSession);
+        if(clientSnapshotsService.processSnapshotsFor(gameSession, snap, gameSession.getSelf(userProfile)))
+            serverSnapshotService.sendSnapshotsFor(gameSession, gameSession.getSelf(userProfile));
+        else serverSnapshotService.sendErrorFor(gameSession.getSelf(userProfile));
         if(gameSession.isGameOver())
             endGame(userProfile, gameSession);
     }

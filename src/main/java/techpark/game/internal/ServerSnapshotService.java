@@ -6,6 +6,7 @@ import techpark.game.GameSession;
 import techpark.game.avatar.AOE;
 import techpark.game.avatar.GameUser;
 import techpark.game.avatar.ThroneDamage;
+import techpark.game.base.Error;
 import techpark.game.base.ServerMazeSnap;
 import techpark.game.base.ServerWaveSnap;
 import techpark.resources.Generator;
@@ -32,8 +33,8 @@ public class ServerSnapshotService {
     }
 
     @SuppressWarnings("OverlyBroadCatchBlock")
-    public void sendSnapshotsFor(GameSession session){
-        processFirstPart(session);
+    public void sendSnapshotsFor(GameSession session, GameUser player){
+        processFirstPart(session, player);
         boolean ready = true;
         for (GameUser gamer: session.getUsers())
             ready &= gamer.isReady();
@@ -43,8 +44,9 @@ public class ServerSnapshotService {
         }
     }
 
-    private void processFirstPart(GameSession session){
+    private void processFirstPart(GameSession session, GameUser gameUser){
         final ServerMazeSnap serverSnap = new ServerMazeSnap();
+        serverSnap.setUser(gameUser.getUser().getLogin());
         serverSnap.setMap(session.field.getMap());
         try {
             final EventMessage message = new EventMessage(ServerMazeSnap.class, objectMapper.writeValueAsString(serverSnap));
@@ -77,6 +79,16 @@ public class ServerSnapshotService {
         }
         catch (IOException ex) {
             throw new RuntimeException("Failed sending snapshot", ex);
+        }
+    }
+
+    public void sendErrorFor(GameUser player){
+        try {
+            final EventMessage message = new EventMessage(Error.class, objectMapper.writeValueAsString(new Error()));
+            remotePointService.sendMessageToUser(player.getUser(), message);
+        }
+        catch (IOException ex) {
+            throw new RuntimeException("Failed sending error", ex);
         }
     }
 

@@ -18,33 +18,37 @@ import java.util.Map;
 @Service
 public class ClientSnapshotsService {
 
-    public void processSnapshotsFor(GameSession session, ClientSnap snap, GameUser gamer){
+    public boolean processSnapshotsFor(GameSession session, ClientSnap snap, GameUser gamer){
         final Generator generator = new Generator();
         if(gamer.getAvaliableGems().size() != (int) generator.settings("gemsPerRound")){
-            processFirstPart(session, snap, gamer);
+           return processFirstPart(session, snap, gamer);
         }
         else {
-            processSecondtPart(session, snap, gamer);
+           return processSecondtPart(session, snap, gamer);
         }
     }
 
-    private void processFirstPart(GameSession session, ClientSnap snap, GameUser gamer){
-        session.field.setGem(snap.getSquare());
+    private boolean processFirstPart(GameSession session, ClientSnap snap, GameUser gamer){
+        if (!session.field.setGem(snap.getSquare())) {
+            return false;
+        }
         if(session.field.calculateRoute().isEmpty()){
             session.field.setGem(snap.getSquare(), 'o');
-            return;
+            return false;
         }
         gamer.setAvaliableGem(snap.getSquare(), session.field.getSquare(snap.getSquare()));
+        return true;
     }
 
-    private void processSecondtPart(GameSession session, ClientSnap snap, GameUser gamer){
+    private boolean processSecondtPart(GameSession session, ClientSnap snap, GameUser gamer){
         if(!gamer.getAvaliableGems().containsKey(snap.getSquare())) {
             snap.setStartWave(false);
-            return;
+            return false;
         }
         setGem(session, snap, gamer);
         gamer.clearAvaliableGems();
         gamer.setReady();
+        return true;
     }
 
     private void setGem(GameSession session, ClientSnap snap, GameUser gamer) {

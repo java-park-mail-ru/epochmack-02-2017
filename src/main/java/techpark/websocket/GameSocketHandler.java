@@ -1,6 +1,5 @@
 package techpark.websocket;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -51,6 +50,7 @@ public class GameSocketHandler extends TextWebSocketHandler{
         remotePointService.registerUser(user, webSocketSession);
     }
 
+    @SuppressWarnings("OverlyBroadCatchBlock")
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws AuthenticationException
             , AccountServiceDBException {

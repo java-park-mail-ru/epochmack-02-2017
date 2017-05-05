@@ -34,11 +34,14 @@ public class Field {
         initMap();
     }
 
-    public void setGem(Square coord){
+    public boolean setGem(Square coord){
         final Date dt = new Date();
         final Random random = new Random(dt.getTime());
-        if(map[coord.getX()][coord.getY()] != '#')
-            map[coord.getX()][coord.getY()] = (char) (random.nextInt(6) +'a');
+        if(map[coord.getX()][coord.getY()] == 'o') {
+            map[coord.getX()][coord.getY()] = (char) (random.nextInt(6) + 'a');
+            return true;
+        }
+        return false;
     }
 
     public void setGem(Square coord, char gem){

@@ -92,7 +92,7 @@ public class GameMechanicsTest {
         final ClientSnap snap1 = new ClientSnap();
         snap1.setSquare(new Square(2, 2));
         gameMechanics.addClientSnapshot(user.getUser(), snap1);
-        Thread.sleep(500);
+        Thread.sleep(800);
         Assert.assertEquals(gameSession.field.getMap()[2][2], 'o');
         endGame(gameSession);
     }
