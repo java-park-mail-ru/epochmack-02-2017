@@ -9,11 +9,6 @@ import techpark.game.avatar.Square;
 public class ClientSnap {
     private Square square;
     private Character comb;
-    private boolean startWave;
-
-    public void setStartWave(boolean startWave) {
-        this.startWave = startWave;
-    }
 
     public void setComb(Character comb) {
         this.comb = comb;
@@ -31,7 +26,4 @@ public class ClientSnap {
         return square;
     }
 
-    public boolean isStartWave() {
-        return startWave;
-    }
 }

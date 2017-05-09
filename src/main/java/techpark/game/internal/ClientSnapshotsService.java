@@ -42,7 +42,6 @@ public class ClientSnapshotsService {
 
     private boolean processSecondtPart(GameSession session, ClientSnap snap, GameUser gamer){
         if(!gamer.getAvaliableGems().containsKey(snap.getSquare())) {
-            snap.setStartWave(false);
             return false;
         }
         setGem(session, snap, gamer);

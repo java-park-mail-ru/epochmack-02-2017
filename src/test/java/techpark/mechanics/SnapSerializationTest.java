@@ -28,8 +28,7 @@ public class SnapSerializationTest {
                         "\"x\": 2.0," +
                         "\"y\": 3.0" +
                         "}, " +
-                        "\"comb\":\"\"," +
-                        "\"startWave\":\"false\"" +
+                        "\"comb\":\"\""  +
                         '}';
         final ObjectMapper objectMapper = new ObjectMapper();
         final ClientSnap clientSnap = objectMapper.readValue(clientSnapStr, ClientSnap.class);

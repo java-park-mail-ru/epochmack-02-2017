@@ -134,7 +134,6 @@ public class GameMechanicsTest {
         snap3.setSquare(new Square(1, 3));
         gameMechanics.addClientSnapshot(us1, snap3);
         final ClientSnap snap7 = new ClientSnap();
-        snap7.setStartWave(true);
         snap7.setSquare(new Square(1, 2));
         gameMechanics.addClientSnapshot(us1, snap7);
 
@@ -149,7 +148,6 @@ public class GameMechanicsTest {
         snap33.setSquare(new Square(3, 3));
         gameMechanics.addClientSnapshot(us2, snap33);
         final ClientSnap snap77 = new ClientSnap();
-        snap77.setStartWave(true);
         snap77.setSquare(new Square(3, 2));
         gameMechanics.addClientSnapshot(us2, snap77);
         Thread.sleep(10000);
