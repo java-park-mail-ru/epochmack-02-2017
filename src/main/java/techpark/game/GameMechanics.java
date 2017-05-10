@@ -103,6 +103,9 @@ public class GameMechanics {
 
     private void processAction(UserProfile userProfile, ClientSnap snap){
         final GameSession gameSession = getSessionFor(userProfile);
+        if(gameSession == null){
+            remotePointService.closeConnection(userProfile, CloseStatus.BAD_DATA);
+        }
         if(clientSnapshotsService.processSnapshotsFor(gameSession, snap, gameSession.getSelf(userProfile)))
             serverSnapshotService.sendSnapshotsFor(gameSession, gameSession.getSelf(userProfile));
         else serverSnapshotService.sendErrorFor(gameSession.getSelf(userProfile));

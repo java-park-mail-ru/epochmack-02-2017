@@ -9,6 +9,7 @@ import techpark.game.base.ClientSnap;
 import techpark.game.base.ServerMazeSnap;
 import techpark.game.base.ServerWaveSnap;
 import techpark.game.request.InitGame;
+import techpark.websocket.EventMessage;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -24,15 +25,18 @@ public class SnapSerializationTest {
     public void clientSnapTest() throws IOException {
         final String clientSnapStr =
                 "{ " +
-                        "\"square\":{" +
-                        "\"x\": 2.0," +
-                        "\"y\": 3.0" +
+                        "\"type\": \"techpark.game.base.ClientSnap\", " +
+                        "\"content\": \"{"+
+                        "\\\"square\\\":{" +
+                        "\\\"x\\\": 2," +
+                        "\\\"y\\\": 3" +
                         "}, " +
-                        "\"comb\":\"\""  +
-                        '}';
+                        "\\\"comb\\\": \\\"\\\""  +
+                        "}\"}";
         final ObjectMapper objectMapper = new ObjectMapper();
-        final ClientSnap clientSnap = objectMapper.readValue(clientSnapStr, ClientSnap.class);
-        objectMapper.writeValueAsString(clientSnap);
+        final EventMessage eventMessage = objectMapper.readValue(clientSnapStr, EventMessage.class);
+        final ClientSnap clientSnap = objectMapper.readValue(eventMessage.getContent(), ClientSnap.class);
+         objectMapper.writeValueAsString(clientSnap);
     }
 
     @Test
