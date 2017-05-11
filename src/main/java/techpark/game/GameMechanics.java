@@ -97,14 +97,15 @@ public class GameMechanics {
         final ObjectMapper objectMapper = new ObjectMapper();
         final EventMessage message = new EventMessage(InitGame.Request.class.getName(),
                 objectMapper.writeValueAsString(initMessage));
-        for (GameUser player: session.getUsers())
+        for (GameUser player: session.getUsers()) {
             remotePointService.sendMessageToUser(player.getUser(), message);
+        }
     }
 
     private void processAction(UserProfile userProfile, ClientSnap snap){
         final GameSession gameSession = getSessionFor(userProfile);
         if(gameSession == null){
-            remotePointService.closeConnection(userProfile, CloseStatus.BAD_DATA);
+            return;
         }
         if(clientSnapshotsService.processSnapshotsFor(gameSession, snap, gameSession.getSelf(userProfile)))
             serverSnapshotService.sendSnapshotsFor(gameSession, gameSession.getSelf(userProfile));
