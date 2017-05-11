@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by Варя on 17.04.2017.
  */
-@SuppressWarnings("NullableProblems")
+@SuppressWarnings({"NullableProblems", "unused"})
 public class EventMessage {
 
     @NotNull
