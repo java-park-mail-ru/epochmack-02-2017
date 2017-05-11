@@ -37,7 +37,7 @@ public class Field {
     public boolean setGem(Square coord){
         final Date dt = new Date();
         final Random random = new Random(dt.getTime());
-        if(map[coord.getX()][coord.getY()] == 'o') {
+        if(coord.getX() < width && coord.getY() < height && map[coord.getX()][coord.getY()] == 'o') {
             map[coord.getX()][coord.getY()] = (char) (random.nextInt(6) + 'a');
             return true;
         }

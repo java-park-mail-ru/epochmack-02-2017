@@ -1,5 +1,6 @@
 package techpark.game.avatar;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.xguzm.pathfinding.grid.GridCell;
 
@@ -7,6 +8,7 @@ import org.xguzm.pathfinding.grid.GridCell;
 /**
  * Created by Варя on 22.04.2017.
  */
+@JsonIgnoreProperties({"diagonal", "f", "g", "h", "walkable", "parent", "closedOnJob", "openedOnJob", "index"})
 public class Square extends GridCell {
 
     private boolean diagonal;

@@ -42,23 +42,24 @@ public class ClientSnapshotsService {
 
     private boolean processSecondtPart(GameSession session, ClientSnap snap, GameUser gamer){
         if(!session.field.getAvaliableGems().containsKey(snap.getSquare()) &&
-                gamer.getAvaliableGems().containsKey(snap.getSquare())) {
+                !gamer.getAvaliableGems().containsKey(snap.getSquare())) {
             return false;
         }
         final boolean state = setGem(session, snap, gamer);
         gamer.clearAvaliableGems();
-        gamer.setReady();
+        gamer.setReady(true);
         return state;
     }
 
     private boolean setGem(GameSession session, ClientSnap snap, GameUser gamer) {
         if(snap.getComb() != null ){
             final Map<Square, List<Character>> comb = gamer.calculateCombinations(session.field.getAvaliableGems());
-            if(comb.containsKey(snap.getSquare()) && comb.get(snap.getSquare()).contains(snap.getComb()))
+            if(comb.containsKey(snap.getSquare()) && comb.get(snap.getSquare()).contains(snap.getComb())) {
                 computeCombination(session, snap, gamer.getAvaliableGems());
-            return true;
+                return true;
+            }
         }
-        else if(gamer.getAvaliableGems().containsKey(snap.getSquare())){
+        if(gamer.getAvaliableGems().containsKey(snap.getSquare())){
             session.field.addAvailableGem(snap.getSquare(), gamer.getAvaliableGems().get(snap.getSquare()));
             gamer.delAvailableGems(snap.getSquare());
             session.field.setStones(gamer.getAvaliableGems().keySet());

@@ -1,7 +1,10 @@
 package techpark.game.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import org.springframework.stereotype.Service;
+import org.xguzm.pathfinding.grid.GridCell;
 import techpark.game.GameSession;
 import techpark.game.avatar.AOE;
 import techpark.game.avatar.GameUser;
@@ -70,12 +73,15 @@ public class ServerSnapshotService {
         session.setPoints((int)generator.settings("numberOfEnemies") - aoe.getEnemies().size());
         serverSnap.setPoints(session.getPoints());
         serverSnap.setWave(session.getWave());
-        if(throneDamages.get(throneDamages.size() - 1).getHp() <= 0.0)
+        if(!throneDamages.isEmpty() && throneDamages.get(throneDamages.size() - 1).getHp() <= 0.0) {
             session.setGameOver();
+        }
         try {
             final EventMessage message = new EventMessage(ServerWaveSnap.class, objectMapper.writeValueAsString(serverSnap));
-            for (GameUser player : session.getUsers())
+            for (GameUser player : session.getUsers()) {
+                player.setReady(false);
                 remotePointService.sendMessageToUser(player.getUser(), message);
+            }
         }
         catch (IOException ex) {
             throw new RuntimeException("Failed sending snapshot", ex);
@@ -84,7 +90,7 @@ public class ServerSnapshotService {
 
     public void sendErrorFor(GameUser player){
         try {
-            final EventMessage message = new EventMessage(Error.class, objectMapper.writeValueAsString(new Error()));
+            final EventMessage message = new EventMessage(Error.class, "");
             remotePointService.sendMessageToUser(player.getUser(), message);
         }
         catch (IOException ex) {

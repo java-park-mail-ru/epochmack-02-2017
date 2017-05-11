@@ -1,6 +1,7 @@
 package techpark.game.avatar;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import techpark.resources.Generator;
 import techpark.resources.Resource;
@@ -9,7 +10,7 @@ import techpark.resources.Resource;
  * Created by Варя on 22.04.2017.
  */
 @SuppressWarnings("unused")
-public class Enemy extends Resource{
+public class Enemy extends Resource implements Cloneable{
     private int number;
     private double hp;
     private double speed;
@@ -58,6 +59,7 @@ public class Enemy extends Resource{
         return number;
     }
 
+    @JsonIgnore
     public double getSpeed() {
         return speed;
     }
@@ -87,4 +89,14 @@ public class Enemy extends Resource{
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
+
+    @Override
+    public Enemy clone()  {
+        try {
+            return (Enemy) super.clone();
+        } catch (CloneNotSupportedException e) {
+            return this;
+        }
+    }
+
 }

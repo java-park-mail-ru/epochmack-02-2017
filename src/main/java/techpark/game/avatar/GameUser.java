@@ -20,8 +20,8 @@ public class GameUser {
         ready = false;
     }
 
-    public void setReady() {
-        this.ready = true;
+    public void setReady(boolean ready) {
+        this.ready = ready;
     }
 
     public boolean isReady() {

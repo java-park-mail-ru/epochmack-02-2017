@@ -71,10 +71,11 @@ public class AOE {
         for (int j = 0 ; j < enemies.size(); j++) {
             for (double i = time; i <= enemies.get(j).getSpeed()*coff; i += tower.getFrequency()) {
                 enemies.get(j).incrementHp(tower.getDamage());
-                enemyDamage.add(new EnemyDamage(tower.getSquare().getX() + i,
-                        tower.getSquare().getY() + i, enemies.get(j)));
-                if (enemies.get(j).getHp() <= 0.0) {
+                if (enemies.get(j).getHp() <= 0.0)
                     enemies.get(j).setDead();
+                enemyDamage.add(new EnemyDamage(tower.getSquare().getX() + i,
+                        tower.getSquare().getY() + i, enemies.get(j).clone()));
+                if (enemies.get(j).isDead()) {
                     enemies.remove(enemies.get(j--));
                     break;
                 }
