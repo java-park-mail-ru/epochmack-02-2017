@@ -82,7 +82,7 @@ public class GameSocketHandler extends TextWebSocketHandler{
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus)
             throws AccountServiceDBException {
-        final String login = (String) webSocketSession.getAttributes().get("login");
+        final String login = (String) webSocketSession.getAttributes().get("Login");
         final UserProfile user;
         if (login == null || (user = accountService.getUserByLogin(login)) == null || remotePointService.isConnected(user)) {
             LOGGER.warn("User disconnected but his session was not found (closeStatus=" + closeStatus + ')');
