@@ -20,6 +20,9 @@ public class ClientSnapshotsService {
 
     public boolean processSnapshotsFor(GameSession session, ClientSnap snap, GameUser gamer){
         final Generator generator = new Generator();
+        if(gamer.isReady()){
+           return false;
+        }
         if(gamer.getAvaliableGems().size() != (int) generator.settings("gemsPerRound")){
            return processFirstPart(session, snap, gamer);
         }
