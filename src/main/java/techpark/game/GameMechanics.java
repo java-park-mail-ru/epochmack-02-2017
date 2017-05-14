@@ -53,7 +53,8 @@ public class GameMechanics {
 
     public void addPlayer(UserProfile user){
         executor.submit(()->{
-            if(!waiters.contains(user) && !sessions.containsKey(user)){
+//             if(!waiters.contains(user) && !sessions.containsKey(user)){
+            if(!waiters.contains(user)){
                 waiters.add(user);
                 searchGame();
             }
