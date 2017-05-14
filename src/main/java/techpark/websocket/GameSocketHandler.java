@@ -10,6 +10,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import techpark.exceptions.AccountServiceDBException;
 import techpark.exceptions.HandleException;
+import techpark.game.GameMechanics;
 import techpark.service.AccountService;
 import techpark.user.UserProfile;
 
@@ -28,15 +29,18 @@ public class GameSocketHandler extends TextWebSocketHandler{
     private final EventHandlerContainer eventHandlerContainer;
     @NotNull
     private final RemotePointService remotePointService;
+    @NotNull
+    private final GameMechanics gameMechanics;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     public GameSocketHandler(@NotNull EventHandlerContainer eventHandlerContainer,@NotNull AccountService authService,
-                             @NotNull RemotePointService remotePointService) {
+                             @NotNull RemotePointService remotePointService, @NotNull GameMechanics gameMechanics) {
         this.eventHandlerContainer = eventHandlerContainer;
         this.accountService = authService;
         this.remotePointService = remotePointService;
+        this.gameMechanics = gameMechanics;
     }
 
     @Override
@@ -82,12 +86,13 @@ public class GameSocketHandler extends TextWebSocketHandler{
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus)
             throws AccountServiceDBException {
-        final String login = (String) webSocketSession.getAttributes().get("login");
+        final String login = (String) webSocketSession.getAttributes().get("Login");
         final UserProfile user;
-        if (login == null || (user = accountService.getUserByLogin(login)) == null || remotePointService.isConnected(user)) {
-            LOGGER.warn("User disconnected but his session was not found (closeStatus=" + closeStatus + ')');
+        if (login == null || (user = accountService.getUserByLogin(login)) == null || !remotePointService.isConnected(user)) {
+            LOGGER.error("User disconnected but his session was not found (closeStatus=" + closeStatus + ')');
             return;
         }
+        gameMechanics.endGameFor(user);
         remotePointService.closeConnection(user, closeStatus);
         remotePointService.removeUser(user);
     }

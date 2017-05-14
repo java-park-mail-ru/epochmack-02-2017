@@ -176,8 +176,6 @@ public class GameMechanicsTest {
     }
 
     private void endGame(GameSession gameSession){
-        for(GameUser gamer: gameSession.getUsers()){
-            gameMechanics.endGame(gamer.getUser(), gameSession);
-        }
+        gameMechanics.endGameFor(gameSession);
     }
 }

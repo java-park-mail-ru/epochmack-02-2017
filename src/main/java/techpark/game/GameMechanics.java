@@ -111,17 +111,22 @@ public class GameMechanics {
             serverSnapshotService.sendSnapshotsFor(gameSession, gameSession.getSelf(userProfile));
         else serverSnapshotService.sendErrorFor(gameSession.getSelf(userProfile));
         if(gameSession.isGameOver())
-            endGame(userProfile, gameSession);
+            endGameFor(gameSession);
     }
 
-    public void endGame(UserProfile user, GameSession session){
-        sessions.remove(user);
-        remotePointService.closeConnection(user, CloseStatus.NORMAL);
-        try {
-            accountService.changeScore(user, session.getPoints());
-        } catch (AccountServiceDBException e) {
-            e.printStackTrace();
+    public void endGameFor(GameSession session){
+        for(GameUser gamer: session.getUsers()){
+            sessions.remove(gamer.getUser());
+            try {
+                accountService.changeScore(gamer.getUser(), session.getPoints());
+            } catch (AccountServiceDBException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public void endGameFor(UserProfile user){
+        endGameFor(sessions.get(user));
     }
 
     public GameSession getSessionFor(UserProfile userProfile){
