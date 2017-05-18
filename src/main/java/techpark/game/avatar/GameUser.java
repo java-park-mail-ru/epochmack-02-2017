@@ -48,6 +48,20 @@ public class GameUser {
         avaliableGems.remove(stone);
     }
 
+    private boolean contains(List<String> entry, Collection<Character> allGems){
+        boolean state = false;
+        for (String anEntry : entry) {
+            for (Character all : allGems) {
+                if (all.toString().equals(anEntry)) {
+                    state = true;
+                }
+            }
+            if (!state)
+                return false;
+            state = false;
+        }
+        return true;
+    }
 
     @SuppressWarnings("unchecked")
     public HashMap<Square, List<Character>> calculateCombinations(HashMap<Square, Character> fieldGems){
@@ -55,19 +69,21 @@ public class GameUser {
         allGems.putAll(fieldGems);
         allGems.putAll(avaliableGems);
         final Generator generator = new Generator();
-        final HashMap<Character,List<Character>> comb = generator.combinations();
+        final HashMap<String,List<String>> comb = generator.combinations();
         final HashMap<Square, List<Character>> combinations = new HashMap<>();
-        for (Map.Entry<Character,List<Character>> entry: comb.entrySet()){
-            if (allGems.values().containsAll(entry.getValue())){
+        for (Map.Entry<String,List<String>> entry: comb.entrySet()){
+            if(contains(entry.getValue(), allGems.values())){
                 addCombination(combinations, entry);
             }
         }
         return combinations;
     }
 
-    private void addCombination(HashMap<Square, List<Character>> combinations, Map.Entry<Character, List<Character>> entry) {
-        for (Map.Entry<Square, Character> gem: avaliableGems.entrySet())
-            if(entry.getValue().contains(gem.getValue()))
-                combinations.computeIfAbsent(gem.getKey(), v -> new ArrayList<>()).add(entry.getKey());
+    private void addCombination(HashMap<Square, List<Character>> combinations, Map.Entry<String, List<String>> entry) {
+        for (Map.Entry<Square, Character> gem : avaliableGems.entrySet()) {
+            if (entry.getValue().contains(gem.getValue().toString())) {
+                combinations.computeIfAbsent(gem.getKey(), v -> new ArrayList<>()).add(entry.getKey().charAt(0));
+            }
+        }
     }
 }

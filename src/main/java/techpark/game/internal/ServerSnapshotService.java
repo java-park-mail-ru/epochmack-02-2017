@@ -1,10 +1,7 @@
 package techpark.game.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import org.springframework.stereotype.Service;
-import org.xguzm.pathfinding.grid.GridCell;
 import techpark.game.GameSession;
 import techpark.game.avatar.AOE;
 import techpark.game.avatar.GameUser;
@@ -52,10 +49,11 @@ public class ServerSnapshotService {
         serverSnap.setUser(gameUser.getUser().getLogin());
         serverSnap.setMap(session.field.getMap());
         try {
-            final EventMessage message = new EventMessage(ServerMazeSnap.class, objectMapper.writeValueAsString(serverSnap));
             for (GameUser player : session.getUsers()) {
-                if(player.getAvaliableGems().size() == (int)generator.settings("gemsPerRound"))
+                if(player.getAvaliableGems().size() == (int)generator.settings("gemsPerRound")) {
                     serverSnap.setCombinatios(player.calculateCombinations(session.field.getAvaliableGems()));
+                }
+                final EventMessage message = new EventMessage(ServerMazeSnap.class, objectMapper.writeValueAsString(serverSnap));
                 remotePointService.sendMessageToUser(player.getUser(), message);
             }
         } catch (IOException ex) {
