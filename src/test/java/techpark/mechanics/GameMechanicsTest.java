@@ -71,7 +71,7 @@ public class GameMechanicsTest {
     }
 
     @Test
-    public void gameStartedTest ()  {
+    public void gameStartedTest () throws InterruptedException {
         final GameSession gameSession = startGame();
         endGame(gameSession);
     }
@@ -166,14 +166,10 @@ public class GameMechanicsTest {
         endGame(gameSession);
     }
 
-    private GameSession startGame()  {
+    private GameSession startGame() throws InterruptedException {
         gameMechanics.addPlayer(user1);
         gameMechanics.addPlayer(user2);
-        try {
-            Thread.sleep(800);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread.sleep(700);
         final GameSession gameSession = gameMechanics.getSessionFor(user1);
         Assert.assertNotNull(gameSession);
         final List<UserProfile> users = new ArrayList<>();
