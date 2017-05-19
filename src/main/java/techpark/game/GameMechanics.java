@@ -120,7 +120,7 @@ public class GameMechanics {
             try {
                 accountService.changeScore(gamer.getUser(), session.getPoints());
             } catch (AccountServiceDBException e) {
-                e.printStackTrace();
+                logger.warn("failed connect to db", e);
             }
         }
     }

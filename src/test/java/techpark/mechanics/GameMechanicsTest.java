@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -44,22 +46,28 @@ public class GameMechanicsTest {
     private GameMechanics gameMechanics;
     @Autowired
     private AccountService accountService;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private UserProfile user1;
     private UserProfile user2;
 
 
     @Before
-    public void setUp () throws AccountServiceDBException {
+    public void setUp ()  {
         when(remotePointService.isConnected(any())).thenReturn(true);
         try {
-            accountService.register("mail1", "login1", "password1");
-            accountService.register("mail2", "login2", "password2");
+            try {
+                accountService.register("mail1", "login1", "password1");
+                accountService.register("mail2", "login2", "password2");
+            }
+            catch (AccountServiceDDException e){
+                logger.warn("dublicate value", e);
+            }
+            Assert.assertNotNull(user1 = accountService.getUserByLogin("login1"));
+            Assert.assertNotNull(user2 = accountService.getUserByLogin("login2"));
         }
-        catch (AccountServiceDDException e){
-            e.printStackTrace();
+        catch (AccountServiceDBException q){
+            logger.warn("failed connect to db", q);
         }
-        Assert.assertNotNull(user1 = accountService.getUserByLogin("login1"));
-        Assert.assertNotNull(user2 = accountService.getUserByLogin("login2"));
     }
 
     @Test
@@ -162,7 +170,7 @@ public class GameMechanicsTest {
         gameMechanics.addPlayer(user1);
         gameMechanics.addPlayer(user2);
         try {
-            Thread.sleep(700);
+            Thread.sleep(800);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
