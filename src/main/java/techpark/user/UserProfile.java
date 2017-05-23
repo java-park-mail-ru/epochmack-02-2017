@@ -67,10 +67,4 @@ public class UserProfile {
         return result;
     }
 
-//    @Override
-//    public int hashCode() {
-//        final int result = login.hashCode() + mail.hashCode() + password.hashCode();
-//        return result ^ (result >>> 31);
-//    }
-
 }
