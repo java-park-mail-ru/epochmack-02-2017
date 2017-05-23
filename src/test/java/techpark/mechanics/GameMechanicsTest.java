@@ -25,6 +25,7 @@ import techpark.websocket.RemotePointService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -71,13 +72,13 @@ public class GameMechanicsTest {
     }
 
     @Test
-    public void gameStartedTest () throws InterruptedException {
+    public void gameStartedTest () throws InterruptedException, ExecutionException {
         final GameSession gameSession = startGame();
         endGame(gameSession);
     }
 
     @Test
-    public void putTowerTest() throws InterruptedException {
+    public void putTowerTest() throws InterruptedException, ExecutionException {
         final GameSession gameSession = startGame();
         final GameUser userProfile1 = gameSession.getUsers().get(0);
         final GameUser userProfile2 = gameSession.getUsers().get(1);
@@ -86,27 +87,25 @@ public class GameMechanicsTest {
         final ClientSnap snap2 = new ClientSnap();
         snap2.setSquare(new Square(5, 3));
         gameMechanics.addClientSnapshot(userProfile1.getUser(), snap1);
-        gameMechanics.addClientSnapshot(userProfile2.getUser(), snap2);
-        Thread.sleep(100);
+        gameMechanics.addClientSnapshot(userProfile2.getUser(), snap2).get();
         Assert.assertNotEquals(gameSession.field.getMap()[8][3], 'o');
         Assert.assertNotEquals(gameSession.field.getMap()[5][3], 'o');
         endGame(gameSession);
     }
 
     @Test
-    public void putWrongTowerTest() throws InterruptedException {
+    public void putWrongTowerTest() throws InterruptedException, ExecutionException {
         final GameSession gameSession = startGame();
         final GameUser user = gameSession.getUsers().get(0);
         final ClientSnap snap1 = new ClientSnap();
         snap1.setSquare(new Square(2, 2));
-        gameMechanics.addClientSnapshot(user.getUser(), snap1);
-        Thread.sleep(800);
+        gameMechanics.addClientSnapshot(user.getUser(), snap1).get();
         Assert.assertEquals(gameSession.field.getMap()[2][2], 'o');
         endGame(gameSession);
     }
 
     @Test
-    public void encloseTowerTest() throws InterruptedException {
+    public void encloseTowerTest() throws InterruptedException, ExecutionException {
         final GameSession gameSession = startGame();
         final GameUser user = gameSession.getUsers().get(0);
         final ClientSnap snap1 = new ClientSnap();
@@ -120,15 +119,14 @@ public class GameMechanicsTest {
         gameMechanics.addClientSnapshot(user.getUser(), snap3);
         final ClientSnap snap4 = new ClientSnap();
         snap4.setSquare(new Square(6, 5));
-        gameMechanics.addClientSnapshot(user.getUser(), snap4);
-        Thread.sleep(700);
+        gameMechanics.addClientSnapshot(user.getUser(), snap4).get();
         Assert.assertEquals(gameSession.field.getMap()[6][5], 'o');
         endGame(gameSession);
     }
 
 
     @Test
-    public void waveTest() throws InterruptedException {
+    public void waveTest() throws InterruptedException, ExecutionException {
         final GameSession gameSession = startGame();
         final UserProfile us1 = gameSession.getUsers().get(0).getUser();
         final UserProfile us2 = gameSession.getUsers().get(1).getUser();
@@ -157,8 +155,7 @@ public class GameMechanicsTest {
         gameMechanics.addClientSnapshot(us2, snap33);
         final ClientSnap snap77 = new ClientSnap();
         snap77.setSquare(new Square(3, 2));
-        gameMechanics.addClientSnapshot(us2, snap77);
-        Thread.sleep(10000);
+        gameMechanics.addClientSnapshot(us2, snap77).get();
         Assert.assertEquals(gameSession.getPoints(), 10);
         Assert.assertEquals(gameSession.getWave(), 1);
         Assert.assertEquals(gameSession.field.getMap()[3][3], '#');
@@ -166,10 +163,9 @@ public class GameMechanicsTest {
         endGame(gameSession);
     }
 
-    private GameSession startGame() throws InterruptedException {
+    private GameSession startGame() throws InterruptedException, ExecutionException {
         gameMechanics.addPlayer(user1);
-        gameMechanics.addPlayer(user2);
-        Thread.sleep(700);
+        gameMechanics.addPlayer(user2).get();
         final GameSession gameSession = gameMechanics.getSessionFor(user1);
         Assert.assertNotNull(gameSession);
         final List<UserProfile> users = new ArrayList<>();
