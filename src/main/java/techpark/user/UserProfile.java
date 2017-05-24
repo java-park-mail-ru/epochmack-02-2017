@@ -15,6 +15,10 @@ public class UserProfile {
     private String password;
     private Integer hightScore;
 
+    public UserProfile(@NotNull String mail, @NotNull String login, @NotNull String password){
+        this(mail, login, password, null);
+    }
+
     public UserProfile(@NotNull String mail, @NotNull String login, @NotNull String password,
                        @Nullable Integer score){
         this.mail = mail;
@@ -42,6 +46,25 @@ public class UserProfile {
 
     public Integer getScore(){
         return hightScore;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final UserProfile userProfile = (UserProfile) o;
+        if (!login.equals(userProfile.login)) return false;
+        if (!mail.equals(userProfile.mail)) return false;
+        return password.equals(userProfile.password);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mail != null ? mail.hashCode() : 0;
+        result = 31 * result + (login != null ? login.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (hightScore != null ? hightScore.hashCode() : 0);
+        return result;
     }
 
 }
